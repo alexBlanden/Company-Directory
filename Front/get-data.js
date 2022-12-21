@@ -6,4 +6,3 @@ export var getData = function (address, query) {
         data: query
     })
 }
-

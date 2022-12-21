@@ -7,8 +7,8 @@ import {
     sortTableByColumnDesc
 } from './tables/table-sort.js'
 
-function getAllData () {
-    var selectAll = new getData('../Project2/Back/getAll.php', {
+function getAllPersonnel () {
+    var selectAll = new getData('./Back/getAll.php', {
 
     });$.when(selectAll).then((result)=>{
         console.log(result);
@@ -32,6 +32,19 @@ function getAllData () {
     })
 }
 
+function getAllDepartments () {
+    var getLocations = new getData('./Back/getAllDepartments.php', {
+
+    });$.when(getLocations).then((result)=> {
+        console.log(result)
+        $('#edit-user-dept').html("")
+        $('#create-user-dept').html("")
+        for(let i = 0; i < result.data.length; i++){
+            $('#edit-user-dept',).append(`<option value="${result.data[i].id}">${result.data[i].name}</option>`)
+            $('#create-user-dept').append(`<option value="${result.data[i].id}">${result.data[i].name}</option>`)}
+    });
+}
+
 function populateUserModal(id) {
     var selectUserById = new getData('./Back/getPersonnelByID.php', 
     {
@@ -53,7 +66,19 @@ function populateUserModal(id) {
     })
 }
 
-// $('.edit-user-btn').on('click', function (){editUserModal.toggle(), console.log('opening modal')});
+function createNewUser(firstName, lastName, email, departmentID){
+    console.log(firstName, lastName, email, departmentID)
+    var insertUser = new getData('./Back/insertUser.php', 
+    {
+        firstName,
+        lastName,
+        email,
+        departmentID,
+    });$.when(insertUser).then(()=>{getAllPersonnel(), getAllDepartments()}, (err)=> {
+        console.log(err);
+    })
+}
+
 const editUserModal = document.getElementById('edit-user-modal')
 editUserModal.addEventListener('show.bs.modal', event => {
     const button = event.relatedTarget;
@@ -62,8 +87,23 @@ editUserModal.addEventListener('show.bs.modal', event => {
 
 })
 
-// $('#create-user-btn').on('click', ()=>editUserModal.toggle());
+// $('#create-user-form').submit ((event)=> {
+//     event.preventDefault;
+//     const firstName = $('#create-user-firstname').val();
+//     const surname = $('#create-user-surname').val();
+//     const email = $('#create-user-email').val();
+//     const departmentId = $('#create-user-dept').val();
+//     createNewUser(firstName, surname, email, departmentId);
+// })
 
+$('#add-personnel').on('click', (event)=> {
+    event.preventDefault;
+    const firstName = $('#create-user-firstname').val();
+    const surname = $('#create-user-surname').val();
+    const email = $('#create-user-email').val();
+    const departmentId = $('#create-user-dept').val();
+    createNewUser(firstName, surname, email, departmentId);
+})
 
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
 $('#p-surname').on('click', ()=> {
@@ -144,4 +184,4 @@ $('#p-location').on('click', ()=> {
     }
 });
 
-$( document ).ready(getAllData())
+$( document ).ready(getAllPersonnel(), getAllDepartments())

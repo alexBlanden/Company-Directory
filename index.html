@@ -8,7 +8,6 @@
     <link href="./Front/Assets/fontawesome-free-6.2.1-web/css/fontawesome.min.css" rel="stylesheet">
     <link href="./Front/Assets/fontawesome-free-6.2.1-web/css/solid.min.css" rel="stylesheet">
     <link rel="stylesheet" href="./Front/style.css">
-    <link rel="stylesheet" href="./Front/tables/table-sort.css">
     <title>User Design</title>
 </head>
 <body>
@@ -166,6 +165,7 @@
         </div>
     </div>
 <!-- Modals -->
+    <!-- See/Edit existing user -->
     <div class="modal" id="edit-user-modal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
           <div class="modal-content">
@@ -213,7 +213,7 @@
           </div>
         </div>
     </div>
-    
+    <!-- Create new user -->
     <div class="modal" id="create-user-modal" tabindex="-1">
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
         <div class="modal-content">
@@ -225,19 +225,18 @@
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-            <form action="post">
+            <form id="create-user-form" action="post">
             <div class="mb-3">
-                <label for="create-user-name" class="form-label">Forename</label>
-                <input type="text" class="form-control" id="create-user-name" value="">
+                <label for="create-user-firstname" class="form-label">Forename</label>
+                <input type="text" class="form-control" id="create-user-firstname" value="">
             </div>
             <div class="mb-3">
                 <label for="create-user-surname" class="form-label">Surname</label>
                 <input type="text" class="form-control" id="create-user-surname" value="">
             </div>
             <div class="mb-3">
-                <label for="create-user-email" class="form-label">Surname</label>
+                <label for="create-user-email" class="form-label">Email</label>
                 <input type="email" class="form-control" id="create-user-email" value="">
-                <button type="button" class="btn btn-primary mt-1 fs-6">Contact</button>
             </div>
             <div class="mb-3">
                 <label for="create-user-dept" class="form-label">Department</label>
@@ -249,12 +248,11 @@
                 <select name="" id="location" class="form-select">
                 </select>
             </div>
-
             </form>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button type="button" class="btn btn-success">Create</button>
+            <button class="btn btn-success" id="add-personnel" type="submit">Create</button>
         </div>
         </div>
     </div>
