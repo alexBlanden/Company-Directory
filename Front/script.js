@@ -7,6 +7,21 @@ import {
     sortTableByColumnDesc
 } from './tables/table-sort.js'
 
+import {
+    createAlert
+} from './alert.js'
+
+import {
+    backToTop,
+    scrollFunction
+} from './scrollToTop.js'
+
+
+window.onscroll = function () {
+    scrollFunction();
+}
+
+//Populate Personnel Table
 function getAllPersonnel () {
     var selectAll = new getData('./Back/getAll.php', {
 
@@ -22,7 +37,7 @@ function getAllPersonnel () {
             <td>${result.data[i].location}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                 <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button>
-                <button type="button" class="btn btn-danger"><i class="fa-solid fa-trash"></i></button>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-user-modal" data-id="${result.data[i].id}"><i class="fa-solid fa-trash"></i></button>
             </div></td>
         </tr>`)
         }
@@ -31,7 +46,33 @@ function getAllPersonnel () {
         console.log(error.responseText)
     })
 }
-
+//Fetch user details for user delete modal
+function populateUserDeleteModal(id){
+    var selectUserById = new getData('./Back/getPersonnelByID.php', 
+    {
+        id
+    });$.when(selectUserById).then(result => {
+        console.log(result)
+        const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
+        const id = result.data.personnel[0].id
+        console.log(id)
+        $('#confirm-delete').html(`Are you sure you want to delete ${fullName}? You cannot undo this action`)
+        $('#confirm-delete-user-button').on('click', ()=>deleteUser(id))
+    })
+}
+//Delete user
+function deleteUser(id) {
+    var deletePersonnel = new getData('./Back/deleteUserByID.php', 
+    {
+        id
+    });$.when(deletePersonnel).then(result => {
+        console.log(result)
+        createAlert('user-alert', result.data, 'danger')
+        getAllPersonnel()
+        backToTop();
+    }, err => console.log(err))
+}
+//Populate dropdown select menu for create user
 function getAllDepartments () {
     var getLocations = new getData('./Back/getAllDepartments.php', {
 
@@ -44,7 +85,7 @@ function getAllDepartments () {
             $('#create-user-dept').append(`<option value="${result.data[i].id}">${result.data[i].name}</option>`)}
     });
 }
-
+//Fetch user details for edit
 function populateUserModal(id) {
     var selectUserById = new getData('./Back/getPersonnelByID.php', 
     {
@@ -65,36 +106,57 @@ function populateUserModal(id) {
         $('#edit-user-dept').val(result.data.personnel[0].departmentID);
     })
 }
+//Display message asking user to confirm creation 
+function confirmCreateNewUser(firstName, surname, email, department, departmentId){
+    $('#confirm-create-firstname').html(firstName)
+    $('#confirm-create-surname').html(surname)
+    $('#confirm-create-email').html(email)
+    $('#confirm-create-department').html(department)
 
+    $('#confirm-add-personnel').on('click', ()=>{
+        createNewUser(firstName, surname, email, departmentId)
+    })
+}
+//Upon confirm, create new user
 function createNewUser(firstName, lastName, email, departmentID){
-    console.log(firstName, lastName, email, departmentID)
     var insertUser = new getData('./Back/insertUser.php', 
     {
         firstName,
         lastName,
         email,
         departmentID,
-    });$.when(insertUser).then(()=>{getAllPersonnel(), getAllDepartments()}, (err)=> {
+    });$.when(insertUser).then(
+        ()=>{
+        $('#create-firstname').html("")
+        $('#create-surname').html("")
+        $('#create-email').html("")
+        $('#create-department').html("")
+        getAllPersonnel(), 
+        getAllDepartments(),
+        createAlert('user-alert', 'User created successfully!', 'success')
+        scrollFunction();
+    },
+     (err)=> {
         console.log(err);
     })
 }
 
+//Fetch user-id from button data attribute to populate user info modal
 const editUserModal = document.getElementById('edit-user-modal')
 editUserModal.addEventListener('show.bs.modal', event => {
     const button = event.relatedTarget;
     const userId = button.getAttribute('data-id');
     populateUserModal(userId)
-
 })
 
-// $('#create-user-form').submit ((event)=> {
-//     event.preventDefault;
-//     const firstName = $('#create-user-firstname').val();
-//     const surname = $('#create-user-surname').val();
-//     const email = $('#create-user-email').val();
-//     const departmentId = $('#create-user-dept').val();
-//     createNewUser(firstName, surname, email, departmentId);
-// })
+//Fetch user-id from button data attribute to create confirm delete message
+const deleteUserModal = document.getElementById('delete-user-modal')
+deleteUserModal.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget;
+    const userId = button.getAttribute('data-id');
+    populateUserDeleteModal(userId);
+})
+
 
 $('#add-personnel').on('click', (event)=> {
     event.preventDefault;
@@ -102,8 +164,10 @@ $('#add-personnel').on('click', (event)=> {
     const surname = $('#create-user-surname').val();
     const email = $('#create-user-email').val();
     const departmentId = $('#create-user-dept').val();
-    createNewUser(firstName, surname, email, departmentId);
+    const department = $( "#create-user-dept option:selected" ).text();
+    confirmCreateNewUser(firstName, surname, email, department, departmentId)
 })
+
 
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
 $('#p-surname').on('click', ()=> {

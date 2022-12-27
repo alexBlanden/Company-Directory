@@ -29,6 +29,7 @@
     </nav>
     <div class="tab-content">
         <div class="tab-pane fade show active" id="people-tab-pane" role="tabpanel" aria-labelledby="people-tab" tabindex="0">
+            <div id="user-alert" class="container-fluid"></div>
             <div class="container-fluid d-flex">
                 <div class="container-fluid">
                     <table class="table table-striped table-hover table-sortable" id="personnel-table">
@@ -252,16 +253,76 @@
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            <button class="btn btn-success" id="add-personnel" type="submit">Create</button>
+            <button class="btn btn-success" id="add-personnel" data-bs-target="#confirm-create-user-modal" data-bs-toggle="modal">Create</button>
         </div>
         </div>
     </div>
     </div>
+    <!-- Confirm create new user -->
+    <div class="modal" data-bs-backdrop="static" data-bs-keyboard="false" id="confirm-create-user-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+            <div class="modal-header">
+                <div class="container d-flex justify-content-start">
+                    <i class="fa-solid fa-2x fa-plus-circle"></i>
+                    <h5 class="modal-title ms-4">Create User?</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container d-flex justify-content-around align-baseline">
+                    <i class="fa-solid fa-10x fa-portrait"></i>  
+                    <ul class="mt-2 fs-5">
+                        <li id="confirm-create-firstname">Firstname</li>
+                        <li id="confirm-create-surname">Surname</li>
+                        <li id="confirm-create-email">Email</li>
+                        <li id="confirm-create-department">Department</li>
+                    </ul> 
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#create-user-modal">Go Back</button>
+                <button class="btn btn-success" id="confirm-add-personnel" data-bs-dismiss="modal" type="submit">Confirm</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    <!-- Delete User -->
+    <div class="modal" data-bs-backdrop="static" data-bs-keyboard="false" id="delete-user-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+            <div class="modal-header">
+                <div class="container d-flex justify-content-start">
+                    <i class="fa-solid fa-2x fa-warning text-danger"></i>
+                    <h5 class="modal-title ms-4">Delete User?</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container d-flex justify-content-around align-baseline">
+                    <!-- <i class="fa-solid fa-10x fa-portrait"></i>  -->
+                    <span id="confirm-delete"></span> 
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="confirm-delete-user-button" data-bs-dismiss="modal" type="submit">Confirm</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- scroll to top button -->
+    <button class="btn btn-primary btn-floating btn-lg" id="btn-back-to-top">
+        <i class="fa-solid fa-arrow-alt-circle-up"></i>
+    </button>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+jjXkk+Q2h455rYXK/7HAuoJl+0I4" crossorigin="anonymous"></script>
     <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
     <script src="./Front/jquery-3.6.1.min.js"></script>
     <script type ="module" src="./Front/get-data.js"></script>
     <script type ="module" src="./Front/tables/table-sort.js"></script>
+    <script type="module "src="./Front/alert.js"></script>
+    <script type="module" src="./Front/scrollToTop.js"></script>
     <script type ="module" src="./Front/script.js"></script>
 
 </body>
