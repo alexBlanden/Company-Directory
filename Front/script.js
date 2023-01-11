@@ -3,9 +3,14 @@ import {
 } from './get-data.js'
 
 import {
-    sortTableByColumnAsc, 
-    sortTableByColumnDesc
+    sortPersonnelTableByColumn,
+    sortDepartmentsTableByColumn,
+    sortLocationsTableByColumn
 } from './tables/table-sort.js'
+
+import {
+    searchTable
+} from './tables/table-search.js'
 
 import {
     createAlert
@@ -21,13 +26,10 @@ window.onscroll = function () {
     scrollFunction();
 }
 
-//Populate Personnel Table
-function getAllPersonnel () {
-    var selectAll = new getData('./Back/getAll.php', {
+$("#personnel-search").keyup(()=> searchTable())
 
-    });$.when(selectAll).then((result)=>{
-        console.log(result);
-        $('#personnel-table-body').html("")
+export function populatePersonnelTable(result){
+    $('#personnel-table-body').html("")
         for(let i = 0; i < result.data.length; i++){
             $('#personnel-table-body').append(`<tr>
             <td data-id="${result.data[i].id}">${result.data[i].lastName}</td>
@@ -41,10 +43,29 @@ function getAllPersonnel () {
             </div></td>
         </tr>`)
         }
+}
 
-    }, function (error){
-        console.log(error.responseText)
-    })
+export function populateLocationsTable(result){
+    $('#locations-table-body').html("")
+    console.log(result)
+    for (let i=0; i< result.data.length; i++){
+        $('#locations-table-body').append(`
+        <tr>
+            <td>${result.data[i].name}</td>
+            <td>${result.data[i].department_count}</td>
+        </tr>`)
+    }
+}
+
+//Populate Personnel Table
+function getAllPersonnel () {
+    var selectAll = new getData('./Back/getAll.php', {
+
+    });$.when(selectAll).then(
+        result => populatePersonnelTable(result),
+    
+        error =>console.log(error.responseText)
+    )
 }
 //Fetch user details for user delete modal
 function populateUserDeleteModal(id){
@@ -74,16 +95,44 @@ function deleteUser(id) {
 }
 //Populate dropdown select menu for create user
 function getAllDepartments () {
-    var getLocations = new getData('./Back/getAllDepartments.php', {
+    var getDepartments = new getData('./Back/getAllDepartments.php', {
 
-    });$.when(getLocations).then((result)=> {
+    });$.when(getDepartments).then((result)=> {
         console.log(result)
         $('#edit-user-dept').html("")
         $('#create-user-dept').html("")
         for(let i = 0; i < result.data.length; i++){
             $('#edit-user-dept',).append(`<option value="${result.data[i].id}">${result.data[i].name}</option>`)
-            $('#create-user-dept').append(`<option value="${result.data[i].id}">${result.data[i].name}</option>`)}
+            $('#create-user-dept').append(`<option value="${result.data[i].id}">${result.data[i].name}</option>`)
+            
+        }
     });
+}
+
+function getDepartments () {
+    var getDepartmentAndLocation = new getData('./Back/getDepartmentAndLocation.php', {
+
+    });$.when(getDepartmentAndLocation).then(result=> {
+        console.log(result)
+        populateDepartmentsTable(result)
+    })
+}
+
+export function populateDepartmentsTable (result) {
+        $('#departments-table-body').html("");
+        for(let i=0; i<result.data.departmentAndLocation.length; i++){
+            $('#departments-table-body').append(`
+            <tr>
+                <td>${result.data.departmentAndLocation[i].deptName}</td>
+                <td>${result.data.departmentAndLocation[i].locName}</td>
+                <td class="text-end">${result.data.departmentAndLocation[i].personnel_count}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                                <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" class="btn btn-danger"><i class="fa-solid fa-trash"></i></button>
+                </div></td>
+            </tr>
+            `)
+        }
 }
 //Fetch user details for edit
 function populateUserModal(id) {
@@ -157,8 +206,8 @@ deleteUserModal.addEventListener('show.bs.modal', event => {
     populateUserDeleteModal(userId);
 })
 
-
-$('#add-personnel').on('click', (event)=> {
+$('#departments-tab').on('click', ()=>getDepartments(), sortDepartmentsTableByColumn(0, 'ASC'));
+$('#add-personnel').on('click', event => {
     event.preventDefault;
     const firstName = $('#create-user-firstname').val();
     const surname = $('#create-user-surname').val();
@@ -172,13 +221,13 @@ $('#add-personnel').on('click', (event)=> {
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
 $('#p-surname').on('click', ()=> {
     if($('#p-surname').attr('data') == 'up'){
-        sortTableByColumnAsc("personnel-table", 0)
+        sortPersonnelTableByColumn(0, 'ASC')
         $('#p-surname').attr('data', 'down');
 
         $('#p-surname > i').attr('class', '')
         $('#p-surname > i').attr("class", "fa-solid fa-sort-asc")
     } else if ($('#p-surname').attr('data') == 'down'){
-        sortTableByColumnDesc("personnel-table", 0)
+        sortPersonnelTableByColumn(0, 'DESC')
         $('#p-surname').attr('data', 'up');
 
         $('#p-surname > i').attr('class', '')
@@ -188,12 +237,12 @@ $('#p-surname').on('click', ()=> {
 
 $('#p-forename').on('click', ()=> {
     if($('#p-forename').attr('data') == 'up'){
-        sortTableByColumnAsc("personnel-table", 1)
+        sortPersonnelTableByColumn(1, 'ASC')
         $('#p-forename').attr('data', 'down');
         $('#p-forename > i').attr('class', '')
         $('#p-forename > i').attr("class", "fa-solid fa-sort-asc")
     } else if ($('#p-forename').attr('data') == 'down'){
-        sortTableByColumnDesc("personnel-table", 1)
+        sortPersonnelTableByColumn(1, 'DESC')
         $('#p-forename').attr('data', 'up');
         $('#p-forename > i').attr('class', '')
         $('#p-forename > i').attr("class", "fa-solid fa-sort-desc")
@@ -202,13 +251,13 @@ $('#p-forename').on('click', ()=> {
 
 $('#p-email').on('click', ()=> {
     if($('#p-email').attr('data') == 'up'){
-        sortTableByColumnAsc("personnel-table", 2)
+        sortPersonnelTableByColumn(2, 'ASC')
 
         $('#p-email > i').attr('class', '')
         $('#p-email > i').attr("class", "fa-solid fa-sort-asc")
         $('#p-email').attr('data', 'down');
     } else if ($('#p-email').attr('data') == 'down'){
-        sortTableByColumnDesc("personnel-table", 2)
+        sortPersonnelTableByColumn(2, 'DESC')
         $('#p-email').attr('data', 'up');
 
         $('#p-email > i').attr('class', '')
@@ -218,13 +267,13 @@ $('#p-email').on('click', ()=> {
 
 $('#p-dept').on('click', ()=> {
     if($('#p-dept').attr('data') == 'up'){
-        sortTableByColumnAsc("personnel-table", 3)
+        sortPersonnelTableByColumn(3, 'ASC')
         $('#p-dept').attr('data', 'down');
 
         $('#p-dept > i').attr('class', '')
         $('#p-dept > i').attr("class", "fa-solid fa-sort-asc")
     } else if ($('#p-dept').attr('data') == 'down'){
-        sortTableByColumnDesc("personnel-table", 3)
+        sortPersonnelTableByColumn(3, 'DESC')
         $('#p-dept').attr('data', 'up');
 
         $('#p-dept > i').attr('class', '')
@@ -234,13 +283,13 @@ $('#p-dept').on('click', ()=> {
 
 $('#p-location').on('click', ()=> {
     if($('#p-location').attr('data') == 'up'){
-        sortTableByColumnAsc("personnel-table", 4)
+        sortPersonnelTableByColumn(4, 'ASC')
         $('#p-location').attr('data', 'down');
 
         $('#p-location > i').attr('class', '')
         $('#p-location > i').attr("class", "fa-solid fa-sort-asc")
     } else if ($('#p-location').attr('data') == 'down'){
-        sortTableByColumnDesc("personnel-table", 4)
+        sortPersonnelTableByColumn(4, 'DESC')
         $('#p-location').attr('data', 'up');
 
         $('#p-location > i').attr('class', '')
@@ -248,4 +297,60 @@ $('#p-location').on('click', ()=> {
     }
 });
 
+$('#d-name').on('click', ()=> {
+    if($('#d-name').attr('data') == 'up'){
+        sortDepartmentsTableByColumn(0, 'ASC')
+        $('#d-name').attr('data', 'down');
+
+        $('#d-name > i').attr('class', '')
+        $('#d-name > i').attr("class", "fa-solid fa-sort-asc")
+    } else if ($('#d-name').attr('data') == 'down'){
+        sortDepartmentsTableByColumn(0, 'DESC')
+        $('#d-name').attr('data', 'up');
+
+        $('#d-name > i').attr('class', '')
+        $('#d-name > i').attr("class", "fa-solid fa-sort-desc")
+    }
+});
+
+$('#d-location-name').on('click', ()=> {
+    if($('#d-location-name').attr('data') == 'up'){
+        sortDepartmentsTableByColumn(1, 'ASC')
+        $('#d-location-name').attr('data', 'down');
+
+        $('#d-location-name > i').attr('class', '')
+        $('#d-location-name > i').attr("class", "fa-solid fa-sort-asc")
+    } else if ($('#d-location-name').attr('data') == 'down'){
+        sortDepartmentsTableByColumn(1, 'DESC')
+        $('#d-location-name').attr('data', 'up');
+
+        $('#d-location-name > i').attr('class', '')
+        $('#d-location-name > i').attr("class", "fa-solid fa-sort-desc")
+    }
+});
+
+$('#d-personnel-count').on('click', ()=> {
+    if($('#d-personnel-count').attr('data') == 'up'){
+        sortDepartmentsTableByColumn(2, 'ASC')
+        $('#d-personnel-count').attr('data', 'down');
+
+        $('#d-personnel-count > i').attr('class', '')
+        $('#d-personnel-count > i').attr("class", "fa-solid fa-sort-asc")
+    } else if ($('#d-personnel-count').attr('data') == 'down'){
+        sortDepartmentsTableByColumn(2, 'DESC')
+        $('#d-personnel-count').attr('data', 'up');
+
+        $('#d-personnel-count > i').attr('class', '')
+        $('#d-personnel-count > i').attr("class", "fa-solid fa-sort-desc")
+    }
+});
+
+$('.btn-sort').on('click', function () {
+    $('.btn-sort').removeClass('active');
+    $(this).addClass('active');
+})
+
+$('#locations-tab').on('click', ()=> {
+    sortLocationsTableByColumn(0, 'ASC')
+})
 $( document ).ready(getAllPersonnel(), getAllDepartments())
