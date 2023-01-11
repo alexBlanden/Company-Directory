@@ -26,7 +26,8 @@ window.onscroll = function () {
     scrollFunction();
 }
 
-$("#personnel-search").keyup(()=> searchTable())
+$("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", "#personnel-search-select"))
+$("#dept-search").keyup(()=> searchTable("dept-search-input", "departments-table"))
 
 export function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
@@ -342,6 +343,38 @@ $('#d-personnel-count').on('click', ()=> {
 
         $('#d-personnel-count > i').attr('class', '')
         $('#d-personnel-count > i').attr("class", "fa-solid fa-sort-desc")
+    }
+});
+
+$('#l-name').on('click', ()=> {
+    if($('#l-name').attr('data') == 'up'){
+        sortLocationsTableByColumn(0, 'ASC')
+        $('#l-name').attr('data', 'down');
+
+        $('#l-name > i').attr('class', '')
+        $('#l-name > i').attr("class", "fa-solid fa-sort-asc")
+    } else if ($('#l-name').attr('data') == 'down'){
+        sortLocationsTableByColumn(0, 'DESC')
+        $('#l-name').attr('data', 'up');
+
+        $('#l-name > i').attr('class', '')
+        $('#l-name > i').attr("class", "fa-solid fa-sort-desc")
+    }
+});
+
+$('#l-dept-count').on('click', ()=> {
+    if($('#l-dept-count').attr('data') == 'up'){
+        sortLocationsTableByColumn(1, 'ASC')
+        $('#l-dept-count').attr('data', 'down');
+
+        $('#l-dept-count > i').attr('class', '')
+        $('#l-dept-count > i').attr("class", "fa-solid fa-sort-asc")
+    } else if ($('#l-dept-count').attr('data') == 'down'){
+        sortLocationsTableByColumn(1, 'DESC')
+        $('#l-dept-count').attr('data', 'up');
+
+        $('#l-dept-count > i').attr('class', '')
+        $('#l-dept-count > i').attr("class", "fa-solid fa-sort-desc")
     }
 });
 
