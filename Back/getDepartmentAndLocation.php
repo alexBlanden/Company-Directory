@@ -38,7 +38,7 @@
 
 	// SQL does not accept parameters and so is not prepared
 
-	$query = 'SELECT d.name AS deptName, d.ID AS deptID, l.name AS locName, l.ID AS locID, COUNT(p.departmentID) AS personnel_count FROM department AS d JOIN location AS l ON d.locationID = l.ID JOIN personnel AS p ON d.ID = p.departmentID GROUP BY d.name, l.name ORDER BY '.' '. $sortFields[$colVal]. ' '. $direction;
+	$query = 'SELECT d.name AS deptName, d.ID AS deptID, l.name AS locName, l.ID AS locID, COUNT(p.departmentID) AS personnel_count FROM department AS d JOIN location AS l ON d.locationID = l.ID LEFT JOIN personnel AS p ON d.ID = p.departmentID GROUP BY d.name, l.name ORDER BY '.' '. $sortFields[$colVal]. ' '. $direction;
 
 	$result = $conn->query($query);
 	

@@ -21,12 +21,14 @@ import {
     scrollFunction
 } from './scrollToTop.js'
 
+// import { loadToolTips } from './toolTips.js'
+
 
 window.onscroll = function () {
     scrollFunction();
 }
 
-$("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", "#personnel-search-select"))
+$("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", 'personnel'))
 $("#dept-search").keyup(()=> searchTable("dept-search-input", "departments-table"))
 
 export function populatePersonnelTable(result){
@@ -50,12 +52,31 @@ export function populateLocationsTable(result){
     $('#locations-table-body').html("")
     console.log(result)
     for (let i=0; i< result.data.length; i++){
-        $('#locations-table-body').append(`
+        if(result.data.department_count == 0){
+            $('#locations-table-body').append(`
         <tr>
             <td>${result.data[i].name}</td>
             <td>${result.data[i].department_count}</td>
+            <td><div class="container-fluid d-flex justify-content-around">
+                                <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
+                                <button type="button" class="btn btn-danger"><i class="fa-solid fa-trash"></i></button>
+                </div></td>
         </tr>`)
+        } else {
+            $('#locations-table-body').append(`
+            <tr>
+                <td>${result.data[i].name}</td>
+                <td>${result.data[i].department_count}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                                <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Location must be emtpy. Please move Departments!">
+                                <button type="button" class="btn btn-danger disabled"><i class="fa-solid fa-trash"></i></button>
+                                </span>
+                </div></td>
+            </tr>`)
+        }
     }
+    loadToolTips()
 }
 
 //Populate Personnel Table
@@ -78,9 +99,21 @@ function populateUserDeleteModal(id){
         const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
         const id = result.data.personnel[0].id
         console.log(id)
-        $('#confirm-delete').html(`Are you sure you want to delete ${fullName}? You cannot undo this action`)
+        $('#confirm-delete-user').html(`Are you sure you want to delete ${fullName}? You cannot undo this action`)
         $('#confirm-delete-user-button').on('click', ()=>deleteUser(id))
     })
+}
+
+function populateDepartmentDeleteModal (id) {
+    var selectDepartmentByID = new getData('./Back/getDepartmentByID.php',
+    {
+        id
+    });$.when(selectDepartmentByID).then(result => {
+        const id = result.data[0].id;
+        console.log(result);
+        $('#confirm-delete-department').html(`Are you sure you want to delete ${result.data[0].name}? You cannot undo this action`)
+        $('#confirm-delete-department-button').on('click', ()=>deleteDepartment(id));
+    }, error=> console.log(error))
 }
 //Delete user
 function deleteUser(id) {
@@ -93,6 +126,18 @@ function deleteUser(id) {
         getAllPersonnel()
         backToTop();
     }, err => console.log(err))
+}
+
+function deleteDepartment(id){
+    var deleteDepartmentByID = new getData('./Back/deleteDepartmentByID.php',
+    {
+        id
+    });$.when(deleteDepartmentByID).then(result => {
+        console.log(result);
+        createAlert('department-alert', result.data, 'danger');
+        getAllDepartments();
+        backToTop();
+    })
 }
 //Populate dropdown select menu for create user
 function getAllDepartments () {
@@ -116,24 +161,43 @@ function getDepartments () {
     });$.when(getDepartmentAndLocation).then(result=> {
         console.log(result)
         populateDepartmentsTable(result)
-    })
+    });
 }
 
 export function populateDepartmentsTable (result) {
         $('#departments-table-body').html("");
         for(let i=0; i<result.data.departmentAndLocation.length; i++){
-            $('#departments-table-body').append(`
+            if(result.data.departmentAndLocation[i].personnel_count == '0'){
+                console.log('Found empty department')
+                $('#departments-table-body').append(`
             <tr>
                 <td>${result.data.departmentAndLocation[i].deptName}</td>
                 <td>${result.data.departmentAndLocation[i].locName}</td>
                 <td class="text-end">${result.data.departmentAndLocation[i].personnel_count}</td>
                 <td><div class="container-fluid d-flex justify-content-around">
                                 <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
-                                <button type="button" class="btn btn-danger"><i class="fa-solid fa-trash"></i></button>
+                                <button type="button" class="btn btn-danger" data-id="${result.data.departmentAndLocation[i].deptID}" data-bs-target="#delete-department-modal" data-bs-toggle="modal" data-bs-target="delete-department-modal"><i class="fa-solid fa-trash"></i></button>
                 </div></td>
             </tr>
             `)
+            } else {
+                $('#departments-table-body').append(`
+            <tr>
+                <td>${result.data.departmentAndLocation[i].deptName}</td>
+                <td>${result.data.departmentAndLocation[i].locName}</td>
+                <td class="text-end">${result.data.departmentAndLocation[i].personnel_count}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                                <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
+                                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Department must be emtpy. Please move Personnel!">
+                                <button type="button" class="btn btn-danger disabled" data-id="${result.data.departmentAndLocation[i].deptID}"><i class="fa-solid fa-trash"></i></button>
+                                </span>
+                </div></td>
+            </tr>
+            `)
+            }
+            console.log('added')
         }
+        loadToolTips()
 }
 //Fetch user details for edit
 function populateUserModal(id) {
@@ -190,6 +254,10 @@ function createNewUser(firstName, lastName, email, departmentID){
         console.log(err);
     })
 }
+function loadToolTips(){
+    let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
+}
 
 //Fetch user-id from button data attribute to populate user info modal
 const editUserModal = document.getElementById('edit-user-modal')
@@ -200,14 +268,23 @@ editUserModal.addEventListener('show.bs.modal', event => {
 })
 
 //Fetch user-id from button data attribute to create confirm delete message
-const deleteUserModal = document.getElementById('delete-user-modal')
+const deleteUserModal = document.getElementById('delete-user-modal');
 deleteUserModal.addEventListener('show.bs.modal', event => {
     const button = event.relatedTarget;
     const userId = button.getAttribute('data-id');
     populateUserDeleteModal(userId);
 })
 
-$('#departments-tab').on('click', ()=>getDepartments(), sortDepartmentsTableByColumn(0, 'ASC'));
+const deleteDepartmentModal = document.getElementById('delete-department-modal');
+deleteDepartmentModal.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget;
+    const departmentID = button.getAttribute('data-id');
+    populateDepartmentDeleteModal(departmentID);
+})
+
+
+
+$('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
 $('#add-personnel').on('click', event => {
     event.preventDefault;
     const firstName = $('#create-user-firstname').val();

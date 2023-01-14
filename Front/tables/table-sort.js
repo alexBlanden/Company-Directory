@@ -21,7 +21,7 @@ function sortDepartmentsTableByColumn (colVal, direction) {
         colVal,
         direction
     });$.when(getSortedData).then(
-        result => populateDepartmentsTable(result),
+        result => {populateDepartmentsTable(result), console.log(result)},
         error => console.log(error)
     )
 }

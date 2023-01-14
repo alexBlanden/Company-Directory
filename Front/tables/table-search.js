@@ -1,11 +1,11 @@
 export function searchTable(inputName, tableName, selectID = 0) {
-//    var tableColumn = $('#personnel-search-select').val()
-    var tableColumn
-   if ($(selectID).val()) {
-    tableColumn = $selectID.val()
-   } else {
-    tableColumn = 0
-   }
+   var tableColumn = $('#personnel-search-select').val()
+//     var tableColumn
+//    if ($(selectID).val()) {
+//     tableColumn = $selectID.val()
+//    } else {
+//     tableColumn = 0
+//    }
    console.log(tableColumn)
     //Declare variables
     var input,filter, table, tr, td, txtValue;
