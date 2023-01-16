@@ -21,9 +21,21 @@ import {
     capitalise
 } from './capitaliseWord.js'
 
-// import { loadToolTips } from './toolTips.js'
+import {
+    searchTable
+} from './tables/table-search.js'
 
+var newPersonnelFirstName,
+    newPersonnelSurname,
+    newPersonnelEmail,
+    newPersonnelDepartment,
+    newPersonneldepartmentId
 
+var newDepartmentName,
+    newDepartmentLocation,
+    newDepartmentLocationID;
+
+var newLocationName;
 window.onscroll = function () {
     scrollFunction();
 }
@@ -329,22 +341,21 @@ deleteDepartmentModal.addEventListener('show.bs.modal', event => {
 $('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
 $('#add-personnel').on('click', event => {
     event.preventDefault;
-    const firstName = $('#create-user-firstname').val();
-    const surname = $('#create-user-surname').val();
-    const email = $('#create-user-email').val();
-    const departmentId = $('#create-user-dept').val();
-    const department = $( "#create-user-dept option:selected" ).text();
-    confirmCreateNewUser(firstName, surname, email, department, departmentId)
+    newPersonnelFirstName = $('#create-user-firstname').val();
+    newPersonnelSurname = $('#create-user-surname').val();
+    newPersonnelEmail = $('#create-user-email').val();
+    newPersonnelDepartment = $( "#create-user-dept option:selected" ).text();
+    newPersonneldepartmentId = $('#create-user-dept').val();
+    confirmCreateNewUser(newPersonnelFirstName, newPersonnelSurname, newPersonnelEmail, newPersonnelDepartment, newPersonneldepartmentId)
 })
 
 
 $('#create-dept-btn').on('click', ()=> sortLocationsTableByColumn(0, 'ASC'));
 $('#add-dept').on('click', event => {
     event.preventDefault;
-    const department = capitalise($('#create-dept-name').val());
-    const locationId = $('#dept-location-dropdown').val();
-    const location = $('#dept-location-dropdown option:selected');
-    console.log(department, location)
+    newDepartmentName = capitalise($('#create-dept-name').val());
+    newDepartmentLocation = $('#dept-location-dropdown option:selected').text();
+    newDepartmentLocationID = $('#dept-location-dropdown').val();
     confirmCreateNewDept(department, locationId, location);
 })
 
