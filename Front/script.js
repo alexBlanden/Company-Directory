@@ -9,10 +9,6 @@ import {
 } from './tables/table-sort.js'
 
 import {
-    searchTable
-} from './tables/table-search.js'
-
-import {
     createAlert
 } from './alert.js'
 
@@ -20,6 +16,10 @@ import {
     backToTop,
     scrollFunction
 } from './scrollToTop.js'
+
+import {
+    capitalise
+} from './capitaliseWord.js'
 
 // import { loadToolTips } from './toolTips.js'
 
@@ -47,7 +47,18 @@ export function populatePersonnelTable(result){
         </tr>`)
         }
 }
+//Also populates locations dropdown in create department modal
 
+export function populateLocationsDropdown (result) {
+    $('#dept-location-dropdown').html("")
+    for (let i=0; i< result.data.length; i++){
+        if(i == 0) {
+            $('#dept-location-dropdown').append(`<option selected value="${result.data[i].location_id}">${result.data[i].location_name}</option>`)
+        } else { 
+            $('#dept-location-dropdown').append(`<option value="${result.data[i].location_id}">${result.data[i].location_name}</option>`)
+        }
+    }
+}
 export function populateLocationsTable(result){
     $('#locations-table-body').html("")
     console.log(result)
@@ -55,7 +66,7 @@ export function populateLocationsTable(result){
         if(result.data.department_count == 0){
             $('#locations-table-body').append(`
         <tr>
-            <td>${result.data[i].name}</td>
+            <td>${result.data[i].location_name}</td>
             <td>${result.data[i].department_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                                 <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
@@ -65,7 +76,7 @@ export function populateLocationsTable(result){
         } else {
             $('#locations-table-body').append(`
             <tr>
-                <td>${result.data[i].name}</td>
+                <td>${result.data[i].location_name}</td>
                 <td>${result.data[i].department_count}</td>
                 <td><div class="container-fluid d-flex justify-content-around">
                                 <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
@@ -231,6 +242,13 @@ function confirmCreateNewUser(firstName, surname, email, department, departmentI
         createNewUser(firstName, surname, email, departmentId)
     })
 }
+
+function confirmCreateNewDept(department, locationId, location){
+    console.log(department, location)
+    const locationId = locationId;
+    $('#confirm-create-dept-name').html(department);
+    $('#confirm-create-dept-location').html(location);
+}
 //Upon confirm, create new user
 function createNewUser(firstName, lastName, email, departmentID){
     var insertUser = new getData('./Back/insertUser.php', 
@@ -282,6 +300,11 @@ deleteDepartmentModal.addEventListener('show.bs.modal', event => {
     populateDepartmentDeleteModal(departmentID);
 })
 
+// const createDepartmentModal = document.getElementById('create-dept-modal');
+// createDepartmentModal.addEventListener('show.bs.modal', event => {
+
+// })
+
 
 
 $('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
@@ -295,6 +318,16 @@ $('#add-personnel').on('click', event => {
     confirmCreateNewUser(firstName, surname, email, department, departmentId)
 })
 
+
+$('#create-dept-btn').on('click', ()=> sortLocationsTableByColumn(0, 'ASC'));
+$('#add-dept').on('click', event => {
+    event.preventDefault;
+    const department = capitalise($('#create-dept-name').val());
+    const locationId = $('#dept-location-dropdown').val();
+    const location = $('#dept-location-dropdown option:selected').val();
+    console.log(department, location)
+    confirmCreateNewDept(department, locationId, location);
+})
 
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
 $('#p-surname').on('click', ()=> {

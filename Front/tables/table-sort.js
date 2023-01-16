@@ -3,6 +3,7 @@ import {
     populatePersonnelTable,
     populateDepartmentsTable,
     populateLocationsTable,
+    populateLocationsDropdown,
  } from "../script.js";
 
 
@@ -21,7 +22,9 @@ function sortDepartmentsTableByColumn (colVal, direction) {
         colVal,
         direction
     });$.when(getSortedData).then(
-        result => {populateDepartmentsTable(result), console.log(result)},
+        result => {
+            populateDepartmentsTable(result);
+            },
         error => console.log(error)
     )
 }
@@ -30,7 +33,10 @@ function sortLocationsTableByColumn (colVal, direction){
     var getSortedData = new getData('././Back/getLocations.php', {
         colVal,
         direction
-    });$.when(getSortedData).then(result => populateLocationsTable(result), error => console.log(error))
+    });$.when(getSortedData).then(result => {
+        populateLocationsTable(result);
+        populateLocationsDropdown(result);
+    }, error => console.log(error))
 }
 
 export {

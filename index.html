@@ -76,14 +76,13 @@
         <!-- Departments Table-->
         <div class="tab-pane fade" id="departments-tab-pane" role="tabpanel" aria-labelledby="departments-tab" tabindex="0">
             <div id="department-alert" class="container-fluid"></div>
-            <div id="dept-search" class="input-group mb-3 w-50 p-3">
-                <span class="input-group-text" id="dept-search-addon"><i class="fa-solid fa-search"></i></span>
-                <input type="text" id="dept-search-input" class="form-control" aria-label="Surname" aria-describedby="dept-search-addon">
-                <!-- <select class="form-select-s border border-secondary border-opacity-25 rounded-end p-1 text-bg-light" id="dept-search-select">
-                    <option value="0">Surname</option>
-                    <option value="1">Forename</option>
-                    <option value="2">Email</option>
-                </select> -->
+            <div class="container-fluid d-flex justify-content-between">
+                <div id="dept-search" class="input-group w-50">
+                    <span class="input-group-text" id="dept-search-addon"><i class="fa-solid fa-search"></i></span>
+                    <input type="text" id="dept-search-input" class="form-control" aria-label="Department" aria-describedby="dept-search-addon">
+                </div>
+
+                <button type="button" class="btn btn-success" id="create-dept-btn" data-bs-toggle="modal" data-bs-target="#create-dept-modal"><i class="fa-solid fa-1xs fa-plus"></i></button>
             </div>
             <div class="container-fluid d-flex">
                 <div class="container-fluid">
@@ -96,7 +95,6 @@
                             
                             <th class="sort-header text-end">Personnel Count<button type="button" class="btn btn-light btn-sm btn-sort" value="0" id="d-personnel-count" data="up"><i class="fa-solid fa-sort-asc" data-fa-transform="rotate-180"></i></button></th>
                             <th><div class="container-fluid d-flex justify-content-around">
-                                <button type="button" class="btn btn-success"><i class="fa-solid fa-1xs fa-plus"></i></button>
                             </div> </th>
                         </tr>
                     </thead> 
@@ -158,16 +156,9 @@
                 <div class="mb-3">
                     <label for="edit-user-dept" class="form-label">Department</label>
                     <select name="" id="edit-user-dept" class="form-select">
-
+                        <!-- Javascript populates from database -->
                     </select>
                 </div>
-                <div class="mb-3">
-                    <label for="edit-user-location" class="form-label">Location</label>
-                    <select name="" id="edit-user-location" class="form-select">
-                        
-                    </select>
-                </div>
-
               </form>
             </div>
             <div class="modal-footer">
@@ -205,11 +196,6 @@
             <div class="mb-3">
                 <label for="create-user-dept" class="form-label">Department</label>
                 <select name="" id="create-user-dept" class="form-select">
-                </select>
-            </div>
-            <div class="mb-3">
-                <label for="location" class="form-label">Location</label>
-                <select name="" id="location" class="form-select">
                 </select>
             </div>
             </form>
@@ -275,6 +261,67 @@
         </div>
     </div>
 
+    <!-- Create Department -->
+    <div class="modal" id="create-dept-modal" tabindex="-1">
+            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                <div class="modal-content">
+                <div class="modal-header">
+                    <div class="container d-flex justify-content-start">
+                        <i class="fa-solid fa-2x fa-plus-circle"></i>
+                        <h5 class="modal-title ms-4">Create Department</h5>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="create-dept-form" action="post">
+                    <div class="mb-3">
+                        <label for="create-dept-name" class="form-label">Department Name</label>
+                        <input type="text" class="form-control" id="create-dept-name" value="">
+                    </div>
+                    <div class="mb-3">
+                        <label for="dept-location" class="form-label">Location</label>
+                        <select name="" id="dept-location-dropdown" class="form-select">
+
+                        </select>
+                    </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button class="btn btn-success" id="add-dept" data-bs-toggle="modal" data-bs-target="#confirm-create-dept-modal">Create</button>
+                </div>
+                </div>
+            </div>
+    </div>
+
+    <!-- Confirm Create Department -->
+    <div class="modal" data-bs-backdrop="static" data-bs-keyboard="false" id="confirm-create-dept-modal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+            <div class="modal-header">
+                <div class="container d-flex justify-content-start">
+                    <i class="fa-solid fa-2x fa-plus-circle"></i>
+                    <h5 class="modal-title ms-4">Create Department?</h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container d-flex justify-content-around align-baseline">
+                    <i class="fa-solid fa-10x fa-portrait"></i>  
+                    <ul class="mt-2 fs-5">
+                        <li id="confirm-create-dept-name"></li>
+                        <li id="confirm-create-dept-location"></li>
+                    </ul> 
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" href="#create-user-modal">Go Back</button>
+                <button class="btn btn-success" id="confirm-add-dept" data-bs-dismiss="modal" type="submit">Confirm</button>
+            </div>
+            </div>
+        </div>
+    </div>
+    
     <!-- Delete Department -->
     <div class="modal" data-bs-backdrop="static" data-bs-keyboard="false" id="delete-department-modal" tabindex="-1">
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
@@ -311,8 +358,8 @@
     <script type ="module" src="./Front/tables/table-sort.js"></script>
     <script type="module "src="./Front/alert.js"></script>
     <script type="module" src="./Front/scrollToTop.js"></script>
-    <script type="module" src="./Front/tables/table-search.js"></script>
     <!-- <script type ="module" src="./Front/toolTips.js"></script> -->
+    <script type="module" src="./Front/capitaliseWord.js"></script>
     <script type ="module" src="./Front/script.js"></script>
 
 </body>
