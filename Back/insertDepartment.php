@@ -39,7 +39,7 @@
 
 	$query = $conn->prepare('INSERT INTO department (name, locationID) VALUES(?,?)');
 
-	$query->bind_param("si", $_REQUEST['name'], $_REQUEST['locationID']);
+	$query->bind_param("si", $_POST['departmentName'], $_POST['locationId']);
 
 	$query->execute();
 	
@@ -60,7 +60,7 @@
 
 	$output['status']['code'] = "200";
 	$output['status']['name'] = "ok";
-	$output['status']['description'] = "success";
+	$output['status']['description'] = "Department Created Successfully!";
 	$output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
 	$output['data'] = [];
 	

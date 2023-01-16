@@ -243,11 +243,28 @@ function confirmCreateNewUser(firstName, surname, email, department, departmentI
     })
 }
 
-function confirmCreateNewDept(department, locationId, location){
-    console.log(department, location)
-    const locationId = locationId;
-    $('#confirm-create-dept-name').html(department);
+function confirmCreateNewDept(departmentName, locationId, location){
+    $('#confirm-create-dept-name').html("");
+    $('#confirm-create-dept-location').html("");
+    console.log(departmentName, location, locationId)
+    // const locationId = locationId;
+    $('#confirm-create-dept-name').html(departmentName);
     $('#confirm-create-dept-location').html(location);
+    $('#confirm-add-dept').on('click', ()=> addDepartment(departmentName, locationId));
+}
+
+function addDepartment (name, locationId) {
+    var insertDepartment = new getData('./Back/insertDepartment.php', 
+    {
+        name,
+        locationId
+    });$.when(insertDepartment).then((result)=> {
+        console.log(result);
+        $('#create-dept-name').html("");
+        getAllDepartments();
+        createAlert('department-alert', result.status.description, 'success');
+    }, err => console.log(err))
+
 }
 //Upon confirm, create new user
 function createNewUser(firstName, lastName, email, departmentID){
@@ -259,19 +276,21 @@ function createNewUser(firstName, lastName, email, departmentID){
         departmentID,
     });$.when(insertUser).then(
         ()=>{
-        $('#create-firstname').html("")
-        $('#create-surname').html("")
-        $('#create-email').html("")
-        $('#create-department').html("")
-        getAllPersonnel(), 
-        getAllDepartments(),
-        createAlert('user-alert', 'User created successfully!', 'success')
+        $('#create-firstname').html("");
+        $('#create-surname').html("");
+        $('#create-email').html("");
+        $('#create-department').html("");
+        getAllPersonnel(); 
+        getAllDepartments();
+        createAlert('user-alert', 'User created successfully!', 'success');
         scrollFunction();
     },
      (err)=> {
         console.log(err);
     })
 }
+
+
 function loadToolTips(){
     let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))
@@ -324,10 +343,11 @@ $('#add-dept').on('click', event => {
     event.preventDefault;
     const department = capitalise($('#create-dept-name').val());
     const locationId = $('#dept-location-dropdown').val();
-    const location = $('#dept-location-dropdown option:selected').val();
+    const location = $('#dept-location-dropdown option:selected');
     console.log(department, location)
     confirmCreateNewDept(department, locationId, location);
 })
+
 
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
 $('#p-surname').on('click', ()=> {
