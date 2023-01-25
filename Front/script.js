@@ -22,13 +22,21 @@ import {
 } from './utils/capitaliseWord.js'
 
 import {
-    resetObject,
-    formIsFilled
-} from './utils/objectReset.js'
-
-import {
     searchTable
 } from './tables/table-search.js'
+
+import {
+    resetObject
+} from './utils/objectReset.js'
+
+var existingPersonnel = {
+    firstName: null,
+    surname: null,
+    email: null,
+    id: null,
+    departmentID: null,
+    departmentName: null
+}
 
 var newPersonnel = {
     firstName: null,
@@ -38,11 +46,20 @@ var newPersonnel = {
     departmentID: null
 }
 
-
+var existingDepartment = {
+    name: null,
+    location: null,
+    locationID: null
+}
 var newDepartment = {
     name: null,
     location: null,
     locationID: null
+}
+
+var existingLocation = {
+    name: null,
+    id: null
 }
 
 var newLocationName;
@@ -50,9 +67,28 @@ window.onscroll = function () {
     scrollFunction();
 }
 
-$('.input-clear').on('click', ()=> $('form input').val(""))
-$("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", 'personnel'))
+//'X' buttons on modals and 'add-new-user/dept/location' will clear text from form inputs:
+$('.input-clear').on('click', ()=> {
+    $('form input').val("");
+    $('#add-personnel > button').attr({
+        'disabled': true,
+        'data-bs-toggle': "tooltip",
+        'title': "Please complete all fields to continue"
+    });
+    $('#add-dept > button').attr({
+        'disabled': true,
+        'data-bs-toggle': "tooltip",
+        'title': "Department needs a name to continue"
+    });
+    $('#add-location > button').attr({
+        'disabled': true,
+        'data-bs-toggle': "tooltip",
+        'title': "Location needs a name to continue"
+    });
+})
+$("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", '#personnel-search-select'))
 $("#dept-search").keyup(()=> searchTable("dept-search-input", "departments-table"))
+$("#location-search").keyup(()=> searchTable("location-search-input", "locations-table"))
 
 export function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
@@ -166,26 +202,34 @@ function populateUserDeleteModal(id){
         id
     });$.when(selectUserById).then(result => {
         console.log(result)
-        const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
-        const id = result.data.personnel[0].id
+        existingPersonnel.firstName = result.data.personnel[0].firstName
+        existingPersonnel.surname = result.data.personnel[0].lastName
+        existingPersonnel.id = result.data.personnel[0].id
         console.log(id)
-        $('#confirm-delete-user').html(`Are you sure you want to delete ${fullName}? You cannot undo this action`)
+        $('#confirm-delete-user').html(`Are you sure you want to delete ${existingPersonnel.firstName} ${existingPersonnel.surname}? You cannot undo this action`)
     })
 }
 
-$('#confirm-delete-user-button').on('click', ()=>deleteUser(id))
+$('#confirm-delete-user-button').on('click', ()=>{
+    deleteUser(existingPersonnel.id);
+    resetObject(existingPersonnel);
+})
 
 function populateDepartmentDeleteModal (id) {
     var selectDepartmentByID = new getData('./Back/getDepartmentByID.php',
     {
         id
     });$.when(selectDepartmentByID).then(result => {
-        const id = result.data[0].id;
+        existingDepartment.id = result.data[0].id;
+        existingDepartment.name = result.data[0].name
         console.log(result.data[0].id);
-        $('#confirm-delete-department').html(`Are you sure you want to delete ${result.data[0].name}? You cannot undo this action`)
-        $('#confirm-delete-department-button').on('click', ()=>deleteDepartment(id));
+        $('#confirm-delete-department').html(`Are you sure you want to delete ${existingDepartment.name}? You cannot undo this action`)
     }, error=> console.log(error))
 }
+$('#confirm-delete-department-button').on('click', ()=>{
+    deleteDepartment(existingDepartment.id);
+    resetObject(existingDepartment);
+});
 
 function populateLocationDeleteModal (id) {
     console.log(id)
@@ -193,21 +237,24 @@ function populateLocationDeleteModal (id) {
     {
         id
     });$.when(selectLocationByID).then(result => {
-        const id = result.data[0].id;
+        existingLocation.id = result.data[0].id;
         console.log(result.data[0].id);
         $('#confirm-delete-location').html(`Are you sure you want to delete ${result.data[0].name}? You cannot undo this action`)
-        $('#confirm-delete-location-button').on('click', ()=>deleteLocation(id));
     }, error=> console.log(error))
 }
 
+$('#confirm-delete-location-button').on('click', ()=>{
+    deleteLocation(existingLocation.id);
+    resetObject(existingLocation);
+});
 function deleteLocation(id){
     var deleteLocationByID = new getData('./Back/deleteLocationByID.php',
     {
         id
     });$.when(deleteLocationByID).then(result => {
         console.log(result);
-        createAlert('department-alert', result.status.description, 'danger');
-        sortDepartmentsTableByColumn(0, 'ASC');
+        createAlert('location-alert', result.status.description, 'danger');
+        sortLocationsTableByColumn(0, 'ASC');
         backToTop();
     })
 }
@@ -252,17 +299,6 @@ function getAllDepartments () {
         }
     });
 }
-
-// function getDepartments () {
-//     var getDepartmentAndLocation = new getData('./Back/getDepartmentAndLocation.php', {
-
-//     });$.when(getDepartmentAndLocation).then(result=> {
-//         console.log(result)
-//         populateDepartmentsTable(result)
-//     });
-// }
-
-
 //Fetch user details for edit
 function populateUserModal(id) {
     var selectUserById = new getData('./Back/getPersonnelByID.php', 
@@ -270,11 +306,20 @@ function populateUserModal(id) {
         id
     });$.when(selectUserById).then(result => {
         console.log(result)
+        //Full name for Modal Title
         const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
+        //Update Existing Personnel Object
+        existingPersonnel.firstName = result.data.personnel[0].firstName;
+        existingPersonnel.surname = result.data.personnel[0].lastName;
+        existingPersonnel.email = result.data.personnel[0].email;
+        existingPersonnel.id = result.data.personnel[0].id;
+        existingPersonnel.departmentID = result.data.personnel[0].departmentID;
+        existingPersonnel.departmentName = result.data.personnel[0].departmentName;
+        //Use Object Values to Populate Placeholder Text
         $('#edit-user-title').html(fullName)
-        $('#edit-user-forename').attr('value', result.data.personnel[0].firstName);
-        $('#edit-user-surname').attr('value', result.data.personnel[0].lastName);
-        $('#edit-user-email').attr('value', result.data.personnel[0].email);
+        $('#edit-user-forename').attr('placeholder', existingPersonnel.firstName);
+        $('#edit-user-surname').attr('placeholder', existingPersonnel.surname);
+        $('#edit-user-email').attr('placeholder', existingPersonnel.email);
 
         $('#edit-user-dept').html("");
         for(let i = 0; i < result.data.department.length; i++){
@@ -282,6 +327,53 @@ function populateUserModal(id) {
         `)}
 
         $('#edit-user-dept').val(result.data.personnel[0].departmentID);
+    })
+}
+
+
+$('#update-user').on('click', ()=> {
+    //Check for new entries in Edit user modal or leave existing personnel object values:
+    if($('#edit-user-forename').val()){
+        existingPersonnel.firstName = capitalise($('#edit-user-forename').val()).trim()
+    }
+
+    if($('#edit-user-surname').val()){
+        existingPersonnel.surname = capitalise($('#edit-user-surname').val()).trim()
+    }
+
+    if($('#edit-user-email').val()){
+        existingPersonnel.email = $('#edit-user-email').val().trim()
+    }
+    existingPersonnel.departmentName = $('#edit-user-dept option:selected').text()
+    existingPersonnel.departmentID = $('#edit-user-dept').val()
+    confirmUpdateUser()
+})
+//Populate modal asking users for confirmation
+function confirmUpdateUser(){   
+    $('#confirm-update-firstname').html(existingPersonnel.firstName)
+    $('#confirm-update-surname').html(existingPersonnel.surname)
+    $('#confirm-update-email').html(existingPersonnel.email)
+    $('#confirm-update-department').html(existingPersonnel.departmentName)
+}
+
+$('#confirm-update-user').on('click', ()=> {
+    updateUser(existingPersonnel.firstName, existingPersonnel.surname, existingPersonnel.email, existingPersonnel.departmentID, existingPersonnel.id)
+})
+
+function updateUser (firstName, lastName, email, departmentID, personnelID) {
+    var sendUserDetails = new getData('./Back/updatePersonnel.php',
+    {
+        firstName,
+        lastName,
+        email,
+        departmentID,
+        personnelID
+    });$.when(sendUserDetails).then(result => {
+        createAlert('user-alert', result.status.description, 'success');
+        resetObject(existingPersonnel);
+        sortPersonnelTableByColumn(0, 'ASC');
+    }, err => {
+        console.log(err)
     })
 }
 //Display message asking user to confirm creation 
@@ -301,7 +393,7 @@ $('#confirm-add-personnel').on('click', ()=>{
     createNewUser(newPersonnel.firstName, newPersonnel.surname, newPersonnel.email, newPersonnel.departmentID)
 })
 
-function addLocation (name) {
+function addLocation(name){
     var insertLocation = new getData('./Back/insertLocation.php', 
     {
         name,
@@ -311,7 +403,14 @@ function addLocation (name) {
         // sortDepartmentsTableByColumn(0, 'ASC');
         sortLocationsTableByColumn(0, 'ASC')
         createAlert('location-alert', result.status.description, 'success');
-    }, err => console.log(err))
+    }, err => {
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            createAlert('location-alert', "ERROR: Location already exists", 'warning')
+        } else {
+            createAlert('location-alert', `ERROR: ${err.responseText}`, 'warning' )
+        }
+        console.log(err)
+    })
 }
 
 function confirmCreateNewDept(departmentName, locationId, location){
@@ -323,7 +422,7 @@ function confirmCreateNewDept(departmentName, locationId, location){
     $('#confirm-create-dept-location').html(location);
 }
 
-$('#confirm-add-dept').on('click', ()=> addDepartment(newDepartmentName, newDepartmentLocationID));
+$('#confirm-add-dept').on('click', ()=> addDepartment(newDepartment.name, newDepartment.locationID));
 $('#confirm-add-location').on('click', ()=> addLocation(newLocationName));
 
 function addDepartment (name, locationId) {
@@ -333,10 +432,17 @@ function addDepartment (name, locationId) {
         locationId
     });$.when(insertDepartment).then((result)=> {
         console.log(result);
-        $('#create-dept-name').html("");
+        // $('#create-dept-name').html("");
         sortDepartmentsTableByColumn(0, 'ASC');
         createAlert('department-alert', result.status.description, 'success');
-    }, err => console.log(err))
+    }, err => {
+        console.log(err)
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            createAlert('department-alert', "ERROR: Department already exists", 'warning')
+        } else {
+            createAlert('department-alert', `WARNING: ${err.responseText}`, 'warning' )
+        }
+    })
 
 }
 //Upon confirm, create new user
@@ -348,18 +454,20 @@ function createNewUser(firstName, lastName, email, departmentID){
         email,
         departmentID,
     });$.when(insertUser).then(
-        ()=>{
-        $('#create-firstname').html("");
-        $('#create-surname').html("");
-        $('#create-email').html("");
-        $('#create-department').html("");
+        (result)=>{
+        resetObject(newPersonnel);
         getAllPersonnel(); 
-        getAllDepartments();
-        createAlert('user-alert', 'User created successfully!', 'success');
+        createAlert('user-alert', result.responseText, 'success');
         scrollFunction();
     },
      (err)=> {
         console.log(err);
+        //Search response error, if 'Duplicate entry' string exists, email is already used as it's the only unique field:
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            createAlert('user-alert', "ERROR: A member of Personnel with that email already exists", 'warning')
+        } else {
+            createAlert('user-alert', `WARNING: ${err.responseText}`, 'warning' )
+        }
     })
 }
 
@@ -406,10 +514,12 @@ $('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
 let personnelFormInputs = $('#create-user-form')
 let departmentFormInputs = $('#create-dept-form')
 let locationFormInputs = $('#create-location-form')
-//Check create user form is filled out:
+//Check create user/dept/location form is filled out, 'create' button stays inactive until formValid == true:
 $('#create-user-form').on('keyup', ()=> {
     let formInputArray = personnelFormInputs.serializeArray()
+    console.log(formInputArray)
     const formValid = formInputArray.every(input => input.value.trim() !== "")
+    console.log(formValid)
     if(formValid){
         $('#add-personnel').attr({
             'data-bs-toggle': "modal"
@@ -672,6 +782,7 @@ $('#l-dept-count').on('click', ()=> {
     }
 });
 
+//Use Bootstrap active state to indicate which column user has arranged by
 $('.btn-sort').on('click', function () {
     $('.btn-sort').removeClass('active');
     $(this).addClass('active');
