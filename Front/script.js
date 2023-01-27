@@ -106,8 +106,26 @@ export function populatePersonnelTable(result){
         </tr>`)
         }
 }
-//Also populates locations dropdown in create department modal
 
+export function populateEditDepartmentLocationDropown(locationID, colVal, direction){
+    var getLocationNameAndID = new getData('./Back/getLocations.php',
+    {
+        colVal,
+        direction
+    });
+    $.when(getLocationNameAndID).then(result => {
+        console.log(locationID)
+        console.log(result)
+        $('#edit-dept-location').html("")
+        for(let i=0; i< result.data.length; i++){
+            if(result.data[i].location_id == locationID){
+                $('#edit-dept-location').append(`<option selected value="${result.data[i].location_id}">${result.data[i].location_name}</option>`)
+            } else {
+                $('#edit-dept-location').append(`<option value="${result.data[i].location_id}">${result.data[i].location_name}</option>`)
+            }
+        }
+    }, err => console.log(err))
+}
 export function populateLocationsDropdown (result) {
     $('#dept-location-dropdown').html("")
     for (let i=0; i< result.data.length; i++){
@@ -151,6 +169,7 @@ export function populateLocationsTable(result){
 
 export function populateDepartmentsTable (result) {
     $('#departments-table-body').html("");
+    console.log(result)
     for(let i=0; i<result.data.departmentAndLocation.length; i++){
         if(result.data.departmentAndLocation[i].personnel_count == '0'){
             console.log('Found empty department')
@@ -160,7 +179,7 @@ export function populateDepartmentsTable (result) {
             <td>${result.data.departmentAndLocation[i].locName}</td>
             <td class="text-end">${result.data.departmentAndLocation[i].personnel_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
-                            <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" class="btn btn-light edit-dept-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
                             <button type="button" class="btn btn-danger" data-id="${result.data.departmentAndLocation[i].deptID}" data-bs-target="#delete-department-modal" data-bs-toggle="modal"><i class="fa-solid fa-trash"></i></button>
             </div></td>
         </tr>
@@ -172,9 +191,9 @@ export function populateDepartmentsTable (result) {
             <td>${result.data.departmentAndLocation[i].locName}</td>
             <td class="text-end">${result.data.departmentAndLocation[i].personnel_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
-                            <button type="button" class="btn btn-light"><i class="fa-solid fa-pen"></i></button>
+                            <button type="button" class="btn btn-light edit-dept-button" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
                             <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Department must be emtpy. Please move Personnel!">
-                            <button type="button" class="btn btn-danger disabled" data-id="${result.data.departmentAndLocation[i].deptID}"><i class="fa-solid fa-trash"></i></button>
+                            <button type="button" class="btn btn-danger disabled"><i class="fa-solid fa-trash"></i></button>
                             </span>
             </div></td>
         </tr>
@@ -421,6 +440,12 @@ function confirmCreateNewDept(departmentName, locationId, location){
     $('#confirm-create-dept-name').html(departmentName);
     $('#confirm-create-dept-location').html(location);
 }
+function confirmEditDepartment(departmentName, locationId, location){
+    $('#confirm-edit-dept-name').html("");
+    $('#confirm-edit-dept-location').html("");
+    $('#confirm-edit-dept-name').html(departmentName);
+    $('#confirm-edit-dept-location').html(location);
+}
 
 $('#confirm-add-dept').on('click', ()=> addDepartment(newDepartment.name, newDepartment.locationID));
 $('#confirm-add-location').on('click', ()=> addLocation(newLocationName));
@@ -485,6 +510,31 @@ editUserModal.addEventListener('show.bs.modal', event => {
     populateUserModal(userId)
 })
 
+const editDepartmentModal = document.getElementById('edit-dept-modal')
+editDepartmentModal.addEventListener('show.bs.modal', event => {
+    console.log('clicked')
+    const button = event.relatedTarget;
+    const editDeptID = button.getAttribute('data-id');
+    const editDeptLocationID = parseInt(button.getAttribute('data-loc-id'));
+    console.log(editDeptID)
+    populateDepartmentModal(editDeptID);
+    populateEditDepartmentLocationDropown(editDeptLocationID, 0, 'ASC');
+})
+
+
+function populateDepartmentModal (id) {
+    var selectDepartmentByID = new getData('./Back/getDepartmentByID.php',
+    {
+        id
+    });$.when(selectDepartmentByID).then(result => {
+        console.log(result)
+        existingDepartment.id = result.data[0].id;
+        existingDepartment.name = result.data[0].name
+        $('#edit-dept-name').attr('placeholder', existingDepartment.name)
+        // console.log(result.data[0].id);
+        // $('#confirm-delete-department').html(`Are you sure you want to delete ${existingDepartment.name}? You cannot undo this action`)
+    }, error=> console.log(error))
+}
 //Fetch user-id from button data attribute to create confirm delete message
 const deleteUserModal = document.getElementById('delete-user-modal');
 deleteUserModal.addEventListener('show.bs.modal', event => {
