@@ -7,6 +7,5 @@ export function capitalise(word) {
     words[i] = words[i][0].toUpperCase() + words[i].substr(1);
   }
   const capitalisedWords = words.join(" ");
-  console.log(capitalisedWords);
   return capitalisedWords;
 }

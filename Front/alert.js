@@ -1,6 +1,5 @@
 export function createAlert (elementID, message, type) {
     const alertPlaceholder = document.getElementById(elementID);
-    console.log(alertPlaceholder)
     const wrapper = document.createElement('div')
     wrapper.innerHTML = [
         `<div class="alert alert-${type} alert-dismissable d-flex justify-content-between align-items-baseline" role="alert">`,

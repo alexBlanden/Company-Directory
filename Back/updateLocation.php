@@ -1,4 +1,9 @@
 <?php
+
+	// example use from browser
+	// http://localhost/companydirectory/libs/php/getPersonnelByID.php?id=<id>
+
+	// remove next two lines for production
 	
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
@@ -26,21 +31,14 @@
 		exit;
 
 	}	
-	$colVal = $_POST['colVal'];
-    $direction = $_POST['direction'];
-    $sortField = ['p.lastName','p.firstName', 'p.email', 'd.name', 'l.name'];
 
-	$query = 'SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location FROM personnel p LEFT JOIN department d ON (d.id = p.departmentID) LEFT JOIN location l ON (l.id = d.locationID) ORDER BY ' . $sortField[$colVal] . ' '.$direction;
+	$query = $conn->prepare('UPDATE `location` SET `name` = ? WHERE `id` = ?');
 
-	// $query = $conn->prepare("SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location FROM personnel p JOIN department d ON (d.id = p.departmentID) LEFT JOIN location l ON (l.id = d.locationID) ORDER BY ?"." ".$direction);
+	$query->bind_param("si", $_POST['name'], $_POST['id']);
 
-	// $query->bind_param("ss", $columnName, $direction);
-	// $query->bind_param("s", $sortField[$colVal]);
-	// $query->execute();
-
-	$result = $conn->query($query);
+	$query->execute();
 	
-	if (!$result) {
+	if (false === $query) {
 
 		$output['status']['code'] = "400";
 		$output['status']['name'] = "executed";
@@ -54,20 +52,12 @@
 		exit;
 
 	}
-	$data=[];
-
-	while ($row = mysqli_fetch_assoc($result)) {
-
-		array_push($data, $row);
-
-	}
-
+    
 	$output['status']['code'] = "200";
 	$output['status']['name'] = "ok";
-	$output['status']['description'] = "success";
+	$output['status']['description'] = "Location Updated Successfully!";
 	$output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
-	$output['data'] = $data;
-
+	
 	mysqli_close($conn);
 
 	echo json_encode($output); 

@@ -12,7 +12,9 @@ function sortPersonnelTableByColumn (colVal, direction){
         colVal,
         direction
     });$.when(getSortedData).then(
-        result => populatePersonnelTable(result),
+        result => {
+            populatePersonnelTable(result);
+        },
         error => console.log(error)
     )
 }

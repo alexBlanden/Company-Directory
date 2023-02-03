@@ -6,7 +6,6 @@ export function searchTable(inputName, tableName, selectID = 0) {
    } else {
     tableColumn = 0
    }
-   console.log(tableColumn)
     //Declare variables
     var input,filter, table, tr, td, txtValue;
     // input = document.getElementById("personnel-search-input");
