@@ -22,7 +22,7 @@ import {
 } from './utils/capitaliseWord.js'
 
 import {
-    searchTable
+    searchPersonnelTable,
 } from './tables/table-search.js'
 
 import {
@@ -87,7 +87,20 @@ $('.input-clear').on('click', ()=> {
         'title': "Location needs a name to continue"
     });
 })
-$("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", '#personnel-search-select'))
+// $("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", '#personnel-search-select'))
+$('#personnel-search-addon-btn').on('click', ()=> {
+    const userVal = $('#personnel-search-input').val()
+    const columnVal = $('#personnel-search-select').val()
+    searchPersonnelTable(userVal, columnVal);
+})
+
+$('#personnel-search-input').keyup((event)=> {
+    if(event.key ==='Enter'){
+        const userVal = $('#personnel-search-input').val()
+        const columnVal = $('#personnel-search-select').val()
+        searchPersonnelTable(userVal, columnVal);
+    }
+})
 $("#dept-search").keyup(()=> searchTable("dept-search-input", "departments-table"))
 $("#location-search").keyup(()=> searchTable("location-search-input", "locations-table"))
 

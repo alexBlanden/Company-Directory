@@ -35,15 +35,17 @@
             <!-- Search Bar and Add User -->
             <div class="container-fluid d-flex justify-content-between">
                 <div id="personnel-search" class="input-group w-50">
-                    <span class="input-group-text" id="personnel-search-addon"><i class="fa-solid fa-search"></i></span>
-                    <input type="text" id="personnel-search-input" class="form-control" aria-label="Surname" aria-describedby="personnel-search-addon">
-                    <select class="w-25 form-select-s border border-secondary border-opacity-25 rounded-end p-1 text-bg-light" id="personnel-search-select">
-                        <option value="0">Surname</option>
-                        <option value="1">Forename</option>
-                        <option value="2">Email</option>
-                    </select>
+                    <!-- <span class="input-group-text" id="personnel-search-addon"> -->
+                        <select class="w-25 form-select-s border border-secondary border-opacity-25 rounded-start p-1 text-bg-light" id="personnel-search-select">
+                            <option value="0">Surname</option>
+                            <option value="1">Forename</option>
+                            <option value="2">Email</option>
+                        </select>
+                    <!-- </span> -->
+                    <input type="text" id="personnel-search-input" class="form-control" aria-label="Surname" aria-describedby="personnel-search-addon" placeholder="Search">
+                    <button id="personnel-search-addon-btn" class="btn btn-secondary"><i class="fa-solid fa-search"></i></button>
                 </div>
-
+                
                 <button type="button" class="btn btn-success input-clear" id="create-user-btn" data-bs-toggle="modal" data-bs-target="#create-user-modal"><i class="fa-solid fa-1xs fa-plus"></i></button>
             </div>
 
