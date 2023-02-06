@@ -22,6 +22,7 @@ import {
 } from './utils/capitaliseWord.js'
 
 import {
+    searchDeptTable,
     searchPersonnelTable,
 } from './tables/table-search.js'
 
@@ -88,21 +89,8 @@ $('.input-clear').on('click', ()=> {
     });
 })
 // $("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", '#personnel-search-select'))
-$('#personnel-search-addon-btn').on('click', ()=> {
-    const userVal = $('#personnel-search-input').val()
-    const columnVal = $('#personnel-search-select').val()
-    searchPersonnelTable(userVal, columnVal);
-})
 
-$('#personnel-search-input').keyup((event)=> {
-    if(event.key ==='Enter'){
-        const userVal = $('#personnel-search-input').val()
-        const columnVal = $('#personnel-search-select').val()
-        searchPersonnelTable(userVal, columnVal);
-    }
-})
-$("#dept-search").keyup(()=> searchTable("dept-search-input", "departments-table"))
-$("#location-search").keyup(()=> searchTable("location-search-input", "locations-table"))
+
 
 export function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
@@ -360,6 +348,7 @@ function populateUserModal(id) {
     {
         id
     });$.when(selectUserById).then(result => {
+        console.log(result)
         //Full name for Modal Title
         const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
         //Update Existing Personnel Object
@@ -585,6 +574,9 @@ editUserModal.addEventListener('show.bs.modal', event => {
     const userId = button.getAttribute('data-id');
     populateUserModal(userId)
 })
+
+
+
 
 const editDepartmentModal = document.getElementById('edit-dept-modal');
 editDepartmentModal.addEventListener('show.bs.modal', event => {
@@ -913,4 +905,57 @@ $('.btn-sort').on('click', function () {
 $('#locations-tab').on('click', ()=> {
     sortLocationsTableByColumn(0, 'ASC')
 })
+
+$('#personnel-search-addon-btn').on('click', ()=> {
+    const userVal = $('#personnel-search-input').val()
+    const columnVal = $('#personnel-search-select').val()
+    searchPersonnelTable(userVal, columnVal);
+})
+
+$('#dept-search-addon-btn').on('click', ()=> {
+    const deptVal = $('#dept-search-input').val()
+    searchDeptTable(deptVal)
+})
+const deptSearchModal = document.getElementById('dept-search-modal');
+deptSearchModal.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget;
+})
+
+const personnelSearchModal = document.getElementById('personnel-search-modal');
+personnelSearchModal.addEventListener('show.bs.modal', event => {
+    const button = event.relatedTarget;
+    // const userId = button.getAttribute('data-id');
+    // populateUserModal(userId)
+})
+
+$('#personnel-search-input').keyup((event)=> {
+    if($('#personnel-search-input').val().trim()){
+        $('#personnel-search-addon-btn').attr('disabled', false)
+    } else {
+        $('#personnel-search-addon-btn').attr('disabled', true)
+    }
+    if(event.key ==='Enter'){
+        // const userVal = $('#personnel-search-input').val()
+        // const columnVal = $('#personnel-search-select').val()
+        $('#personnel-search-addon-btn').click()
+        // searchPersonnelTable(userVal, columnVal);
+        // personnelSearchModal.toggle();
+    }
+})
+
+$("#dept-search").keyup((event)=> {
+    if($('#dept-search-input').val().trim()){
+        $('#dept-search-addon-btn').attr('disabled', false);
+    } else {
+        $('#dept-search-addon-btn').attr('disabled', true);
+        
+    }
+    if(event.key === 'Enter'){
+        $('#dept-search-addon-btn').click();
+    }
+})
+$("#location-search").keyup(()=> searchTable("location-search-input", "locations-table"))
+
+
+
 $( document ).ready(getAllPersonnel(), getAllDepartments())

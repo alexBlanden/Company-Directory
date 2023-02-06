@@ -77,6 +77,7 @@ $query = "SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as d
 	$output['status']['description'] = "success";
 	$output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
 	$output['data'] = $data;
+	$output['data']['length'] = count($data);
 
 	mysqli_close($conn);
 

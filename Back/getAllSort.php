@@ -32,12 +32,6 @@
 
 	$query = 'SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location FROM personnel p LEFT JOIN department d ON (d.id = p.departmentID) LEFT JOIN location l ON (l.id = d.locationID) ORDER BY ' . $sortField[$colVal] . ' '.$direction;
 
-	// $query = $conn->prepare("SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location FROM personnel p JOIN department d ON (d.id = p.departmentID) LEFT JOIN location l ON (l.id = d.locationID) ORDER BY ?"." ".$direction);
-
-	// $query->bind_param("ss", $columnName, $direction);
-	// $query->bind_param("s", $sortField[$colVal]);
-	// $query->execute();
-
 	$result = $conn->query($query);
 	
 	if (!$result) {

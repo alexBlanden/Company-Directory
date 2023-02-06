@@ -1,17 +1,15 @@
 <?php
 
 	// example use from browser
-	// http://localhost/companydirectory/libs/php/insertDepartment.php?name=New%20Department&locationID=<id>
+	// http://localhost/companydirectory/libs/php/getAllDepartments.php
 
-	// remove next two lines for production
+	// remove next two lines for production	
 	
 	ini_set('display_errors', 'On');
 	error_reporting(E_ALL);
 
 	$executionStartTime = microtime(true);
-	
-	// this includes the login details
-	
+
 	include("config.php");
 
 	header('Content-Type: application/json; charset=UTF-8');
@@ -34,16 +32,18 @@
 
 	}	
 
-	// SQL statement accepts parameters and so is prepared to avoid SQL injection.
-	// $_REQUEST used for development / debugging. Remember to change to $_POST for production
-
-	$query = $conn->prepare('INSERT INTO personnel (firstName, lastName, email, departmentID) VALUES(?,?,?,?)');
-
-	$query->bind_param("sssi", $_POST['firstName'], $_POST['lastName'], $_POST['email'], $_POST['departmentID']);
-
-	$query->execute();
 	
-	if (false === $query) {
+
+    $searchVal = $_POST['searchVal'];
+    $searchVal = mysqli_real_escape_string($conn, $searchVal);
+
+	$query = 
+    "SELECT id, name, locationID FROM department
+    WHERE name LIKE '%".$searchVal."%'";
+
+	$result = $conn->query($query);
+	
+	if (!$result) {
 
 		$output['status']['code'] = "400";
 		$output['status']['name'] = "executed";
@@ -57,12 +57,21 @@
 		exit;
 
 	}
+   
+   	$data = [];
+
+	while ($row = mysqli_fetch_assoc($result)) {
+
+		array_push($data, $row);
+
+	}
 
 	$output['status']['code'] = "200";
 	$output['status']['name'] = "ok";
-	$output['status']['description'] = "User Created Successfully";
+	$output['status']['description'] = "success";
 	$output['status']['returnedIn'] = (microtime(true) - $executionStartTime) / 1000 . " ms";
-	$output['data'] = [];
+	$output['data'] = $data;
+    $output['data']['length'] = count($data);
 	
 	mysqli_close($conn);
 

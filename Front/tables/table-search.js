@@ -41,5 +41,59 @@ export function searchPersonnelTable (searchVal, columnVal) {
     {
         searchVal,
         columnVal
-    });$.when(getPersonnelSearchResults).then((result)=>populatePersonnelTable(result))
+    });$.when(getPersonnelSearchResults).then((result)=>populateSearchPersonnelTable(result))
+}
+export function searchDeptTable (searchVal) {
+    var getPersonnelSearchResults = new getData('./Back/deptSearch.php', 
+    {
+        searchVal
+    });$.when(getPersonnelSearchResults).then((result)=>populateSearchDeptTable(result))
+}
+
+export function populateSearchDeptTable (result) {
+    console.log(result)
+    $('#search-dept-table').html("")
+    if(result.data.length == 0){
+        $('#search-dept-table').html(`
+        <tr>
+            <td></td>
+            <td>No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-dept-table').append(
+            `<tr>
+                <td>${result.data[i].name}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+}
+
+
+
+export function populateSearchPersonnelTable (result) {
+    console.log(result)
+    $('#search-personnel-table').html("")
+    if(result.data.length == 0){
+        $('#search-personnel-table').html(`
+        <tr>
+            <td></td>
+            <td>No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-personnel-table').append(
+            `<tr>
+                <td>${result.data[i].firstName}</td>
+                <td>${result.data[i].lastName}</td>
+                <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
 }
