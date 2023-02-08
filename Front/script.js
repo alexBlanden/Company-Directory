@@ -1,34 +1,45 @@
-import {
-    getData
-} from './get-data.js'
+// import {
+//     getData
+// } from './get-data.js'
 
-import {
-    sortPersonnelTableByColumn,
-    sortDepartmentsTableByColumn,
-    sortLocationsTableByColumn
-} from './tables/table-sort.js'
+// import {
+//     sortPersonnelTableByColumn,
+//     sortDepartmentsTableByColumn,
+//     sortLocationsTableByColumn
+// } from './tables/table-sort.js'
 
-import {
-    createAlert
-} from './alert.js'
+// import {
+//     createAlert
+// } from './alert.js'
 
-import {
-    backToTop,
-    scrollFunction
-} from './scrollToTop.js'
+// import {
+//     backToTop,
+//     scrollFunction
+// } from './scrollToTop.js'
 
-import {
-    capitalise
-} from './utils/capitaliseWord.js'
+// import {
+//     capitalise
+// } from './utils/capitaliseWord.js'
 
-import {
-    searchDeptTable,
-    searchPersonnelTable,
-} from './tables/table-search.js'
+// import {
+//     searchDeptTable,
+//     searchPersonnelTable,
+//     searchLocationTable
+// } from './tables/table-search.js'
 
-import {
-    resetObject
-} from './utils/objectReset.js'
+// import {
+//     resetObject
+// } from './utils/objectReset.js'
+
+//Ajax Request:
+var getData = function (address, query) {
+    return $.ajax({
+        url: address,
+        type: "POST",
+        dataType: "json",
+        data: query
+    })
+}
 
 var existingPersonnel = {
     firstName: null,
@@ -92,7 +103,7 @@ $('.input-clear').on('click', ()=> {
 
 
 
-export function populatePersonnelTable(result){
+function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
         for(let i = 0; i < result.data.length; i++){
             $('#personnel-table-body').append(`<tr>
@@ -109,7 +120,7 @@ export function populatePersonnelTable(result){
         }
 }
 
-export function populateEditDepartmentLocationDropown(locationID, colVal, direction){
+function populateEditDepartmentLocationDropown(locationID, colVal, direction){
     var getLocationNameAndID = new getData('./Back/getLocations.php',
     {
         colVal,
@@ -126,7 +137,7 @@ export function populateEditDepartmentLocationDropown(locationID, colVal, direct
         }
     }, err => console.log(err))
 }
-export function populateLocationsDropdown (result) {
+function populateLocationsDropdown (result) {
     $('#dept-location-dropdown').html("")
     for (let i=0; i< result.data.length; i++){
         if(i == 0) {
@@ -136,7 +147,7 @@ export function populateLocationsDropdown (result) {
         }
     }
 }
-export function populateLocationsTable(result){
+function populateLocationsTable(result){
     $('#locations-table-body').html("")
     for (let i=0; i< result.data.length; i++){
         if(result.data[i].department_count == 0){
@@ -166,7 +177,7 @@ export function populateLocationsTable(result){
     loadToolTips()
 }
 
-export function populateDepartmentsTable (result) {
+function populateDepartmentsTable (result) {
     $('#departments-table-body').html("");
     for(let i=0; i<result.data.departmentAndLocation.length; i++){
         if(result.data.departmentAndLocation[i].personnel_count == '0'){
@@ -407,8 +418,6 @@ $('#confirm-edit-dept').on('click', ()=> {
     updateDept(existingDepartment.name, existingDepartment.ID, existingDepartment.locationID)
 })
 
-
-
 $('#confirm-update-user').on('click', ()=> {
     updateUser(existingPersonnel.firstName, existingPersonnel.surname, existingPersonnel.email, existingPersonnel.departmentID, existingPersonnel.id)
 })
@@ -575,9 +584,6 @@ editUserModal.addEventListener('show.bs.modal', event => {
     populateUserModal(userId)
 })
 
-
-
-
 const editDepartmentModal = document.getElementById('edit-dept-modal');
 editDepartmentModal.addEventListener('show.bs.modal', event => {
     const button = event.relatedTarget;
@@ -626,8 +632,6 @@ deleteLocationModal.addEventListener('show.bs.modal', event => {
     const locationID = button.getAttribute('data-id');
     populateLocationDeleteModal(locationID);
 })
-
-
 
 $('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
 
@@ -735,6 +739,74 @@ $('#add-dept').on('click', event => {
     newDepartment.locationID = $('#dept-location-dropdown').val();
     confirmCreateNewDept(newDepartment.name, newDepartment.locationID, newDepartment.location);
 })
+
+//Table Sort Functions:
+function sortPersonnelTableByColumn (colVal, direction){
+    var getSortedData = new getData('././Back/getAllSort.php', {
+        colVal,
+        direction
+    });$.when(getSortedData).then(
+        result => {
+            populatePersonnelTable(result);
+        },
+        error => console.log(error)
+    )
+}
+
+function sortDepartmentsTableByColumn (colVal, direction) {
+    var getSortedData = new getData('././Back/getDepartmentAndLocation.php', {
+        colVal,
+        direction
+    });$.when(getSortedData).then(
+        result => {
+            populateDepartmentsTable(result);
+            },
+        error => console.log(error)
+    )
+}
+
+function sortLocationsTableByColumn (colVal, direction){
+    var getSortedData = new getData('././Back/getLocations.php', {
+        colVal,
+        direction
+    });$.when(getSortedData).then(result => {
+        populateLocationsTable(result);
+        populateLocationsDropdown(result);
+    }, error => console.log(error))
+}
+
+//User Dialogue injects html to relevant element to create bootstrap alert:
+function createAlert (elementID, message, type) {
+    const alertPlaceholder = document.getElementById(elementID);
+    const wrapper = document.createElement('div')
+    wrapper.innerHTML = [
+        `<div class="alert alert-${type} alert-dismissable d-flex justify-content-between align-items-baseline" role="alert">`,
+        `<span class="fs-6">${message}</span>`,
+        '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
+        '</div>'
+    ].join('')
+
+        alertPlaceholder.append(wrapper)
+}
+
+const toTopButton = document.getElementById('btn-back-to-top');
+$(toTopButton).on('click', ()=>backToTop());
+//Measure pixel amount of vertical scroll and change display value or scroll button to suit
+function scrollFunction() {
+    if (
+        document.body.scrollTop > 20 || document.documentElement.scrollTop > 20
+    ) {
+        toTopButton.style.display = "block";
+    } else {
+        toTopButton.style.display = "none"
+    }
+}
+//Reset vertical scroll
+function backToTop () {
+    document.body.scrollTop = 0;
+    document.documentElement.scrollTop = 0;
+}
+
 
 
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
@@ -916,9 +988,14 @@ $('#dept-search-addon-btn').on('click', ()=> {
     const deptVal = $('#dept-search-input').val()
     searchDeptTable(deptVal)
 })
-const deptSearchModal = document.getElementById('dept-search-modal');
-deptSearchModal.addEventListener('show.bs.modal', event => {
-    const button = event.relatedTarget;
+// const deptSearchModal = document.getElementById('dept-search-modal');
+// deptSearchModal.addEventListener('show.bs.modal', event => {
+//     const button = event.relatedTarget;
+// })
+
+$('#location-search-addon-btn').on('click', ()=> {
+    const locationVal = $('#location-search-input').val()
+    searchLocationTable(locationVal)
 })
 
 const personnelSearchModal = document.getElementById('personnel-search-modal');
@@ -954,8 +1031,132 @@ $("#dept-search").keyup((event)=> {
         $('#dept-search-addon-btn').click();
     }
 })
-$("#location-search").keyup(()=> searchTable("location-search-input", "locations-table"))
+$("#location-search").keyup((event)=> {
+    if($('#location-search-input').val().trim()){
+        $('#location-search-addon-btn').attr('disabled', false);
+    } else {
+        $('#location-search-addon-btn').attr('disabled', true);
+    }
+    if(event.key === 'Enter'){
+        $('#location-search-addon-btn').click()
+    }
+})
+//Send user input to back end
+function searchPersonnelTable (searchVal, columnVal) {
+    var getPersonnelSearchResults = new getData('./Back/personnelSearch.php', 
+    {
+        searchVal,
+        columnVal
+    });$.when(getPersonnelSearchResults).then((result)=>populateSearchPersonnelTable(result))
+}
+function searchDeptTable (searchVal) {
+    var getPersonnelSearchResults = new getData('./Back/deptSearch.php', 
+    {
+        searchVal
+    });$.when(getPersonnelSearchResults).then((result)=>populateSearchDeptTable(result))
+}
+function searchLocationTable (searchVal) {
+    var getLocationSearchResults = new getData('./Back/locationSearch.php',
+    {
+        searchVal
+    });$.when(getLocationSearchResults).then((result)=> populateSearchLocationTable(result))
+}
+//Display results from search to user
+function populateSearchDeptTable (result) {
+    console.log(result)
+    $('#search-dept-table').html("")
+    if(result.data.length == 0){
+        $('#search-dept-table').html(`
+        <tr>
+            <td></td>
+            <td class="text-center">No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-dept-table').append(
+            `<tr>
+                <td>${result.data[i].name}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+}
+function populateSearchLocationTable (result) {
+    console.log(result)
+    $('#search-location-table').html("")
+    if(result.data.length == 0){
+        $('#search-location-table').html(`
+        <tr>
+            <td></td>
+            <td class="text-center">No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-location-table').append(
+            `<tr>
+                <td>${result.data[i].name}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-location-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+}
+function populateSearchPersonnelTable (result) {
+    console.log(result)
+    $('#search-personnel-table').html("")
+    if(result.data.length == 0){
+        $('#search-personnel-table').html(`
+        <tr>
+            <td></td>
+            <td class="text-center">No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-personnel-table').append(
+            `<tr>
+                <td>${result.data[i].firstName}</td>
+                <td>${result.data[i].lastName}</td>
+                <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+}
 
+function resetObject(objectName) {
+    let keys = Object.keys(objectName).forEach(key => objectName[key]=null);
+}
 
+// function formIsFilled(objectName){
+//     let keys = Object.keys(objectName).forEach(key => {
+//         if(objectName[key] == null) {
+//             return false;
+//         }
+//         return true;
+//     });
+// }
+// function loadToolTips(){
+//     console.log('Firing')
+//     let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+//     tooltipTriggerList.forEach(element => {
+//     });
+//     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))}
+
+function capitalise(word) {
+    if(!word){
+      return;
+    }
+    const words = word.split(" ");
+    for(let i=0; i < words.length; i++){
+      words[i] = words[i][0].toUpperCase() + words[i].substr(1);
+    }
+    const capitalisedWords = words.join(" ");
+    return capitalisedWords;
+  }
 
 $( document ).ready(getAllPersonnel(), getAllDepartments())

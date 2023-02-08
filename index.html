@@ -113,8 +113,8 @@
             <div id="location-alert" class="container-fluid"></div>
             <div class="container-fluid d-flex justify-content-between">
                 <div id="location-search" class="input-group w-50">
-                    <span class="input-group-text" id="location-search-addon"><i class="fa-solid fa-search"></i></span>
                     <input type="text" id="location-search-input" class="form-control" aria-label="Location" aria-describedby="location-search-addon">
+                    <button class="btn btn-secondary" id="location-search-addon-btn" data-bs-toggle="modal" data-bs-target="#location-search-modal" disabled><i class="fa-solid fa-search"></i></button>
                 </div>
 
                 <button type="button" class="btn btn-success input-clear" id="create-location-btn" data-bs-toggle="modal" data-bs-target="#create-location-modal"><i class="fa-solid fa-1xs fa-plus"></i></button>
@@ -597,13 +597,14 @@
                 </div>
                 <div class="modal-body">
                     <table class="table table-hover table-striped table-bordered">
-                        <thead>
+                        <!-- <thead>
                             <tr>
                                 <th></th>
                                 <th></th>
                                 <th></th>
+                                <th></th>
                             </tr>
-                        </thead>
+                        </thead> -->
                         <tbody id="search-personnel-table">
 
                         </tbody>
@@ -629,12 +630,12 @@
                 </div>
                 <div class="modal-body">
                     <table class="table table-hover table-striped table-bordered">
-                        <thead>
+                        <!-- <thead>
                             <tr>
                                 <th></th>
                                 <th></th>
                             </tr>
-                        </thead>
+                        </thead> -->
                         <tbody id="search-dept-table">
 
                         </tbody>
@@ -647,6 +648,39 @@
           </div>
     </div>
 
+    <!-- Location Search Results -->
+    <div class="modal" id="location-search-modal" tabindex="-1"
+    aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="container d-flex justify-content-start">
+                        <i class="fa-solid fa-2x fa-magnifying-glass"></i>
+                        <h5 class="modal-title ms-4">Search Results</h5>
+                    </div>
+                    <button type="button" class="btn-close input-clear" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <table class="table table-hover table-striped table-bordered">
+                        <!-- <thead>
+                            <tr>
+                                <th></th>
+                                <th></th>
+                            </tr>
+                        </thead> -->
+                        <tbody id="search-location-table">
+
+                        </tbody>
+                    </table>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary input-clear" data-bs-dismiss="modal">Cancel</button>
+                </div>
+              </div>
+          </div>
+    </div>
+
+
     <!-- scroll to top button -->
     <button class="btn btn-primary btn-floating btn-lg" id="btn-back-to-top">
         <i class="fa-solid fa-arrow-alt-circle-up"></i>
@@ -655,12 +689,6 @@
     <script src="./Front/jquery-3.6.1.min.js"></script>
     <script src="https://kit.fontawesome.com/8b56d6a893.js" crossorigin="anonymous"></script>
     <script src="./node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script type ="module" src="./Front/get-data.js"></script>
-    <script type ="module" src="./Front/tables/table-sort.js"></script>
-    <script type="module "src="./Front/alert.js"></script>
-    <script type="module" src="./Front/scrollToTop.js"></script>
-    <script type="module" src="./Front//utils/capitaliseWord.js"></script>
-    <script type="module" src="./Front//utils/objectReset.js"></script>
     <script type ="module" src="./Front/script.js"></script>
 
 </body>

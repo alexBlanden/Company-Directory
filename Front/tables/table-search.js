@@ -50,6 +50,13 @@ export function searchDeptTable (searchVal) {
     });$.when(getPersonnelSearchResults).then((result)=>populateSearchDeptTable(result))
 }
 
+export function searchLocationTable (searchVal) {
+    var getLocationSearchResults = new getData('./Back/locationSearch.php',
+    {
+        searchVal
+    });$.when(getLocationSearchResults).then((result)=> populateSearchLocationTable(result))
+}
+
 export function populateSearchDeptTable (result) {
     console.log(result)
     $('#search-dept-table').html("")
@@ -57,7 +64,7 @@ export function populateSearchDeptTable (result) {
         $('#search-dept-table').html(`
         <tr>
             <td></td>
-            <td>No results found. Please try again.</td>
+            <td class="text-center">No results found. Please try again.</td>
             <td></td>
         </tr>`)
     }
@@ -72,6 +79,28 @@ export function populateSearchDeptTable (result) {
     }
 }
 
+export function populateSearchLocationTable (result) {
+    console.log(result)
+    $('#search-location-table').html("")
+    if(result.data.length == 0){
+        $('#search-location-table').html(`
+        <tr>
+            <td></td>
+            <td class="text-center">No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-location-table').append(
+            `<tr>
+                <td>${result.data[i].name}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-location-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+}
+
 
 
 export function populateSearchPersonnelTable (result) {
@@ -81,7 +110,7 @@ export function populateSearchPersonnelTable (result) {
         $('#search-personnel-table').html(`
         <tr>
             <td></td>
-            <td>No results found. Please try again.</td>
+            <td class="text-center">No results found. Please try again.</td>
             <td></td>
         </tr>`)
     }

@@ -1,2 +1,8 @@
 Front/Assets
 node_modules
+tables/
+utils/
+alert.js
+get-data.js
+scrollToTop.js
+toolTips.js
