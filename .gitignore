@@ -1,7 +1,7 @@
 Front/Assets
 node_modules
-tables/
-utils/
+tables
+utils
 alert.js
 get-data.js
 scrollToTop.js

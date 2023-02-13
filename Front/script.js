@@ -101,12 +101,16 @@ $('.input-clear').on('click', ()=> {
 })
 // $("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", '#personnel-search-select'))
 
-
+var tables = $('table').map(function(){
+    return this.id
+}).get();
+console.log(tables);
 
 function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
+    // $('#personnel-table-body-hidden').html("")
         for(let i = 0; i < result.data.length; i++){
-            $('#personnel-table-body').append(`<tr>
+            $('#personnel-table-body, #personnel-table-body-hidden').append(`<tr>
             <td data-id="${result.data[i].id}">${result.data[i].lastName}</td>
             <td>${result.data[i].firstName}</td>
             <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
@@ -635,6 +639,11 @@ deleteLocationModal.addEventListener('show.bs.modal', event => {
 
 $('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
 
+$(".sticky-header").floatThead({
+    responsiveContainer: function($table){
+        return $table.closest(".table-responsive");
+    }});
+
 let personnelFormInputs = $('#create-user-form')
 let departmentFormInputs = $('#create-dept-form')
 let locationFormInputs = $('#create-location-form')
@@ -787,8 +796,16 @@ function createAlert (elementID, message, type) {
     ].join('')
 
         alertPlaceholder.append(wrapper)
+    tables.forEach(table => $(`#${table}`).trigger('reflow'))
 }
 
+$('#department-alert, #location-alert, #user-alert').on('click', ()=> {
+    tables.forEach(table => {
+        console.log(table)
+        $(`#${table}`).trigger('reflow')
+    });
+    console.log('closed');
+})
 const toTopButton = document.getElementById('btn-back-to-top');
 $(toTopButton).on('click', ()=>backToTop());
 //Measure pixel amount of vertical scroll and change display value or scroll button to suit

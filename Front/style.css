@@ -5,11 +5,11 @@
     display: none;
   }
 
-  /* .btn-sort {
-    background-color: black;
-  }
-
-  .btn-sort.selected {
-    color: black;
-    background-color: azure;
-  } */
+  table.floatThead-table {
+    border-top: none;
+    border-bottom: none;
+    background-color: #FFF;
+}
+#department-alert, #location-alert {
+  z-index: 1002;
+}
