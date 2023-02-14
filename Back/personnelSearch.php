@@ -40,13 +40,10 @@ $query = "SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as d
     LEFT JOIN location l ON (l.id = d.locationID) 
     WHERE $sortField LIKE '%".$searchVal."%'
     ORDER BY $sortField ASC;";
-
-	// $query = "SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location
-    // FROM personnel p 
-    // LEFT JOIN department d ON (d.id = p.departmentID) 
-    // LEFT JOIN location l ON (l.id = d.locationID) 
-    // WHERE $sortField[$columnVal] LIKE '%".$searchVal."%'
-    // ORDER BY $sortField[$columnVal] ASC;";
+	// _________________________
+	// CORRECT SQL TO SEARCH WHOLE DATABASE:
+	// SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name AS department, l.name AS location FROM personnel p LEFT JOIN department d ON d.id = p.departmentID LEFT JOIN location l ON l.id = d.locationID WHERE p.lastName LIKE '%HI%' OR p.firstName LIKE '%HI%' OR p.email LIKE '%HI%' OR l.name LIKE '%HI%' OR d.name LIKE '%HI%';
+	// ______________________
 
 	$result = $conn->query($query);
 	

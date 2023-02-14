@@ -82,8 +82,8 @@ function populatePersonnelTable(result){
             <td data-id="${result.data[i].id}">${result.data[i].lastName}</td>
             <td>${result.data[i].firstName}</td>
             <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
-            <td class="d-none d-lg-block">${result.data[i].department}</td>
-            <td class="d-none d-lg-block">${result.data[i].location}</td>
+            <td class="d-none d-lg-table-cell">${result.data[i].department}</td>
+            <td class="d-none d-lg-table-cell">${result.data[i].location}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                 <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-user-modal" data-id="${result.data[i].id}"><i class="fa-solid fa-trash"></i></button>
@@ -157,7 +157,7 @@ function populateDepartmentsTable (result) {
         <tr>
             <td>${result.data.departmentAndLocation[i].deptName}</td>
             <td>${result.data.departmentAndLocation[i].locName}</td>
-            <td class="text-end d-none d-lg-block">${result.data.departmentAndLocation[i].personnel_count}</td>
+            <td class="text-end d-none d-lg-table-cell">${result.data.departmentAndLocation[i].personnel_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                             <button type="button" class="btn btn-light edit-dept-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
                             <button type="button" class="btn btn-danger" data-id="${result.data.departmentAndLocation[i].deptID}" data-bs-target="#delete-department-modal" data-bs-toggle="modal"><i class="fa-solid fa-trash"></i></button>
@@ -169,7 +169,7 @@ function populateDepartmentsTable (result) {
         <tr>
             <td>${result.data.departmentAndLocation[i].deptName}</td>
             <td>${result.data.departmentAndLocation[i].locName}</td>
-            <td class="text-end d-none d-lg-block">${result.data.departmentAndLocation[i].personnel_count}</td>
+            <td class="text-end d-none d-lg-table-cell">${result.data.departmentAndLocation[i].personnel_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                             <button type="button" class="btn btn-light edit-dept-button" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
                             <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Department must be emtpy. Please move Personnel!">
@@ -607,7 +607,29 @@ deleteLocationModal.addEventListener('show.bs.modal', event => {
 
 $('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
 
+var headerHeight = $('#personnel-global').outerHeight(true) + 58;
+$(window).on('resize', ()=> {
+    if ($(document).width()<= 617){
+        headerHeight = $('#personnel-global').outerHeight(true) + 100;
+        console.log("it's narrow");
+        tables.forEach(table => {
+            console.log(table)
+            $(`#${table}`).trigger('reflow')
+        });
+
+    } else if ($(document).width()> 617){
+        headerHeight = $('#personnel-global').outerHeight(true) + 58;
+        tables.forEach(table => {
+            console.log(table)
+            $(`#${table}`).trigger('reflow')
+        });
+    }
+})
+
 $(".sticky-header").floatThead({
+    top: function() {
+        return headerHeight;
+    },
     responsiveContainer: function($table){
         return $table.closest(".table-responsive");
     }});
@@ -778,14 +800,15 @@ const toTopButton = document.getElementById('btn-back-to-top');
 $(toTopButton).on('click', ()=>backToTop());
 //Measure pixel amount of vertical scroll and change display value or scroll button to suit
 function scrollFunction() {
-    if (
-        document.body.scrollTop > 20 || document.documentElement.scrollTop > 20
-    ) {
+    if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+        console.log(document.documentElement.scrollTop)
         toTopButton.style.display = "block";
     } else {
         toTopButton.style.display = "none"
     }
 }
+
+
 //Reset vertical scroll
 function backToTop () {
     document.body.scrollTop = 0;
@@ -1144,10 +1167,10 @@ function capitalise(word) {
     return capitalisedWords;
   }
 
-  $(window).on('resize', function() {
-    tables.forEach(table => {
-      $(`#${table}`).trigger('reflow');
-    });
-  });
+//   $(window).on('resize', function() {
+//     tables.forEach(table => {
+//       $(`#${table}`).trigger('reflow');
+//     });
+//   });
 
 $( document ).ready(getAllPersonnel(), getAllDepartments())

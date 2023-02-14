@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <nav class="navbar">
+    <nav class="navbar sticky-top bg-light">
         <div class="container-fluid">
             <a href="#" class="navbar-brand"><i class="fa-solid fa-0 fa-people-group"> Company Directory</i></a>
             <ul id="navbar-tabs" class="nav nav-tabs shadow-lg" role="tablist">
@@ -33,7 +33,7 @@
         <div class="tab-pane fade show active" id="people-tab-pane" role="tabpanel" aria-labelledby="people-tab" tabindex="0">
             <div id="user-alert" class="container-fluid"></div>
             <!-- Search Bar and Add User -->
-            <div class="container-fluid d-flex justify-content-between">
+            <div class="container-fluid d-flex justify-content-between search-and-add bg-light" id="personnel-global">
                 <div id="personnel-search" class="input-group w-50">
                         <select class="w-25 form-select-s border border-secondary border-opacity-25 rounded-start p-1 text-bg-light" id="personnel-search-select">
                             <option value="0">Surname</option>
@@ -57,9 +57,9 @@
     
                                 <th class="sort-header">Email<button type="button" class="btn btn-light btn-sm btn-sort" id="p-email" data="up"><i class="fa-solid fa-sort-asc"></i></button></th>
     
-                                <th class="sort-header d-none d-lg-block">Dept.<button type="button" class="btn btn-light btn-sm btn-sort" value="0" id="p-dept" data="up"><i class="fa-solid fa-sort-asc" data="up"></i></button></th>
+                                <th class="sort-header d-none d-lg-table-cell">Dept.<button type="button" class="btn btn-light btn-sm btn-sort" value="0" id="p-dept" data="up"><i class="fa-solid fa-sort-asc" data="up"></i></button></th>
     
-                                <th class="sort-header text-end d-none d-lg-block" >Location<button type="button" class="btn btn-light btn-sm btn-sort" id="p-location" data="up"><i class="fa-solid fa-sort-asc"></i></button></th>
+                                <th class="sort-header d-none d-lg-table-cell" >Location<button type="button" class="btn btn-light btn-sm btn-sort" id="p-location" data="up"><i class="fa-solid fa-sort-asc"></i></button></th>
                                 <th>
                                     <!-- User Control buttons appear in this column -->
                                 </th>
