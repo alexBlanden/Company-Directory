@@ -1,35 +1,3 @@
-// import {
-//     getData
-// } from './get-data.js'
-
-// import {
-//     sortPersonnelTableByColumn,
-//     sortDepartmentsTableByColumn,
-//     sortLocationsTableByColumn
-// } from './tables/table-sort.js'
-
-// import {
-//     createAlert
-// } from './alert.js'
-
-// import {
-//     backToTop,
-//     scrollFunction
-// } from './scrollToTop.js'
-
-// import {
-//     capitalise
-// } from './utils/capitaliseWord.js'
-
-// import {
-//     searchDeptTable,
-//     searchPersonnelTable,
-//     searchLocationTable
-// } from './tables/table-search.js'
-
-// import {
-//     resetObject
-// } from './utils/objectReset.js'
 
 //Ajax Request:
 var getData = function (address, query) {
@@ -110,12 +78,12 @@ function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
     // $('#personnel-table-body-hidden').html("")
         for(let i = 0; i < result.data.length; i++){
-            $('#personnel-table-body, #personnel-table-body-hidden').append(`<tr>
+            $('#personnel-table-body').append(`<tr>
             <td data-id="${result.data[i].id}">${result.data[i].lastName}</td>
             <td>${result.data[i].firstName}</td>
             <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
-            <td>${result.data[i].department}</td>
-            <td>${result.data[i].location}</td>
+            <td class="d-none d-lg-block">${result.data[i].department}</td>
+            <td class="d-none d-lg-block">${result.data[i].location}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                 <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button>
                 <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete-user-modal" data-id="${result.data[i].id}"><i class="fa-solid fa-trash"></i></button>
@@ -189,7 +157,7 @@ function populateDepartmentsTable (result) {
         <tr>
             <td>${result.data.departmentAndLocation[i].deptName}</td>
             <td>${result.data.departmentAndLocation[i].locName}</td>
-            <td class="text-end">${result.data.departmentAndLocation[i].personnel_count}</td>
+            <td class="text-end d-none d-lg-block">${result.data.departmentAndLocation[i].personnel_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                             <button type="button" class="btn btn-light edit-dept-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
                             <button type="button" class="btn btn-danger" data-id="${result.data.departmentAndLocation[i].deptID}" data-bs-target="#delete-department-modal" data-bs-toggle="modal"><i class="fa-solid fa-trash"></i></button>
@@ -201,7 +169,7 @@ function populateDepartmentsTable (result) {
         <tr>
             <td>${result.data.departmentAndLocation[i].deptName}</td>
             <td>${result.data.departmentAndLocation[i].locName}</td>
-            <td class="text-end">${result.data.departmentAndLocation[i].personnel_count}</td>
+            <td class="text-end d-none d-lg-block">${result.data.departmentAndLocation[i].personnel_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                             <button type="button" class="btn btn-light edit-dept-button" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
                             <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Department must be emtpy. Please move Personnel!">
@@ -1175,5 +1143,11 @@ function capitalise(word) {
     const capitalisedWords = words.join(" ");
     return capitalisedWords;
   }
+
+  $(window).on('resize', function() {
+    tables.forEach(table => {
+      $(`#${table}`).trigger('reflow');
+    });
+  });
 
 $( document ).ready(getAllPersonnel(), getAllDepartments())
