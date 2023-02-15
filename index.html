@@ -35,12 +35,7 @@
             <!-- Search Bar and Add User -->
             <div class="container-fluid d-flex justify-content-between search-and-add bg-light" id="personnel-global">
                 <div id="personnel-search" class="input-group w-50">
-                        <select class="w-25 form-select-s border border-secondary border-opacity-25 rounded-start p-1 text-bg-light" id="personnel-search-select">
-                            <option value="0">Surname</option>
-                            <option value="1">Forename</option>
-                            <option value="2">Email</option>
-                        </select>
-                    <input type="text" id="personnel-search-input" class="form-control" aria-label="Surname" aria-describedby="personnel-search-addon" placeholder="Search">
+                    <input type="text" id="personnel-search-input" class="form-control" aria-label="Surname" aria-describedby="personnel-search-addon" placeholder="Search Personnel">
                     <button id="personnel-search-addon-btn" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#personnel-search-modal" disabled><i class="fa-solid fa-search"></i></button>
                 </div>
                 
@@ -74,7 +69,7 @@
         <!-- Departments-->
         <div class="tab-pane fade" id="departments-tab-pane" role="tabpanel" aria-labelledby="departments-tab" tabindex="0">
             <div id="department-alert" class="container-fluid"></div>
-            <div class="container-fluid d-flex justify-content-between">
+            <div class="container-fluid d-flex justify-content-between search-and-add bg-light" id="department-global">
                 <div id="dept-search" class="input-group w-50">
                     <input type="text" id="dept-search-input" class="form-control" aria-label="Department" aria-describedby="dept-search-addon">
                     <button id="dept-search-addon-btn" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#dept-search-modal" disabled><i class="fa-solid fa-search"></i></button>
@@ -105,7 +100,7 @@
         <!-- Locations-->
         <div class="tab-pane fade" id="locations-tab-pane" role="tabpanel" aria-labelledby="locations-tab" tabindex="0">
             <div id="location-alert" class="container-fluid"></div>
-            <div class="container-fluid d-flex justify-content-between">
+            <div class="container-fluid d-flex justify-content-between search-and-add bg-light" id="location-global">
                 <div id="location-search" class="input-group w-50">
                     <input type="text" id="location-search-input" class="form-control" aria-label="Location" aria-describedby="location-search-addon">
                     <button class="btn btn-secondary" id="location-search-addon-btn" data-bs-toggle="modal" data-bs-target="#location-search-modal" disabled><i class="fa-solid fa-search"></i></button>
@@ -580,7 +575,7 @@
     <!-- Personnel Search Results -->
     <div class="modal" id="personnel-search-modal" tabindex="-1"
     aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
                     <div class="container d-flex justify-content-start">

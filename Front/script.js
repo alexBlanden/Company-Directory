@@ -9,6 +9,8 @@ var getData = function (address, query) {
     })
 }
 
+var headerHeight;
+
 var existingPersonnel = {
     firstName: null,
     surname: null,
@@ -50,7 +52,7 @@ window.onscroll = function () {
 
 //'X' buttons on modals and 'add-new-user/dept/location' will clear text from form inputs:
 $('.input-clear').on('click', ()=> {
-    $('form input').val("");
+    $('input[type=text]').val("");
     $('#add-personnel > button').attr({
         'disabled': true,
         'data-bs-toggle': "tooltip",
@@ -67,11 +69,11 @@ $('.input-clear').on('click', ()=> {
         'title': "Location needs a name to continue"
     });
 })
-// $("#personnel-search").keyup(()=> searchTable("personnel-search-input", "personnel-table", '#personnel-search-select'))
 
 var tables = $('table').map(function(){
     return this.id
 }).get();
+setStickyTHeads()
 console.log(tables);
 
 function populatePersonnelTable(result){
@@ -605,26 +607,30 @@ deleteLocationModal.addEventListener('show.bs.modal', event => {
     populateLocationDeleteModal(locationID);
 })
 
-$('#departments-tab').on('click', ()=>sortDepartmentsTableByColumn(0, 'ASC'));
+$('#departments-tab').on('click', ()=>{
+    sortDepartmentsTableByColumn(0, 'ASC');
+});
 
-var headerHeight = $('#personnel-global').outerHeight(true) + 58;
+
+console.log(headerHeight);
 $(window).on('resize', ()=> {
+    setStickyTHeads()
+})
+
+//Table headers stick just below search which moves to fit nav bar on smaller screens so sticky point must be reset
+function setStickyTHeads () {
     if ($(document).width()<= 617){
-        headerHeight = $('#personnel-global').outerHeight(true) + 100;
-        console.log("it's narrow");
-        tables.forEach(table => {
-            console.log(table)
+        headerHeight = 150
+        tables.forEach(table => {    
             $(`#${table}`).trigger('reflow')
         });
-
     } else if ($(document).width()> 617){
-        headerHeight = $('#personnel-global').outerHeight(true) + 58;
+        headerHeight = 96;
         tables.forEach(table => {
-            console.log(table)
             $(`#${table}`).trigger('reflow')
         });
     }
-})
+}
 
 $(".sticky-header").floatThead({
     top: function() {
@@ -801,7 +807,6 @@ $(toTopButton).on('click', ()=>backToTop());
 //Measure pixel amount of vertical scroll and change display value or scroll button to suit
 function scrollFunction() {
     if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
-        console.log(document.documentElement.scrollTop)
         toTopButton.style.display = "block";
     } else {
         toTopButton.style.display = "none"
@@ -984,12 +989,13 @@ $('.btn-sort').on('click', function () {
 
 $('#locations-tab').on('click', ()=> {
     sortLocationsTableByColumn(0, 'ASC')
+    // headerHeight = $('#location-global').outerHeight(true);
 })
 
 $('#personnel-search-addon-btn').on('click', ()=> {
     const userVal = $('#personnel-search-input').val()
-    const columnVal = $('#personnel-search-select').val()
-    searchPersonnelTable(userVal, columnVal);
+    // const columnVal = $('#personnel-search-select').val()
+    searchPersonnelTable(userVal);
 })
 
 $('#dept-search-addon-btn').on('click', ()=> {
@@ -1020,11 +1026,7 @@ $('#personnel-search-input').keyup((event)=> {
         $('#personnel-search-addon-btn').attr('disabled', true)
     }
     if(event.key ==='Enter'){
-        // const userVal = $('#personnel-search-input').val()
-        // const columnVal = $('#personnel-search-select').val()
         $('#personnel-search-addon-btn').click()
-        // searchPersonnelTable(userVal, columnVal);
-        // personnelSearchModal.toggle();
     }
 })
 
@@ -1050,12 +1052,15 @@ $("#location-search").keyup((event)=> {
     }
 })
 //Send user input to back end
-function searchPersonnelTable (searchVal, columnVal) {
+function searchPersonnelTable (searchVal) {
     var getPersonnelSearchResults = new getData('./Back/personnelSearch.php', 
     {
-        searchVal,
-        columnVal
-    });$.when(getPersonnelSearchResults).then((result)=>populateSearchPersonnelTable(result))
+        searchVal
+    });$.when(getPersonnelSearchResults).then((result)=>{
+        populateSearchPersonnelTable(result)
+    }, (error)=> {
+        console.log(error);
+    })
 }
 function searchDeptTable (searchVal) {
     var getPersonnelSearchResults = new getData('./Back/deptSearch.php', 
@@ -1129,6 +1134,9 @@ function populateSearchPersonnelTable (result) {
                 <td>${result.data[i].firstName}</td>
                 <td>${result.data[i].lastName}</td>
                 <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
+                <td class="d-none d-lg-table-cell">${result.data[i].department}</td>
+                <td class="d-none d-lg-table-cell">${result.data[i].location}</td>
+
                 <td><div class="container-fluid d-flex justify-content-around">
                 <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
             </tr>`
