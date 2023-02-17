@@ -34,12 +34,14 @@
 
 	
 
-    $searchVal = $_POST['searchVal'];
-    $searchVal = mysqli_real_escape_string($conn, $searchVal);
+    $searchVal = "%".$_POST['searchVal']."%";
 
-	$query = 
-    "SELECT id, name FROM location
-    WHERE name LIKE '%".$searchVal."%'";
+	$query = $conn->prepare("SELECT id, name FROM location
+    WHERE name LIKE ?");
+	$query->bind_param("s", $searchVal);
+	$query->execute();
+
+	$result = $query->get_result();
 
 	$result = $conn->query($query);
 	
