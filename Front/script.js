@@ -74,7 +74,6 @@ var tables = $('table').map(function(){
     return this.id
 }).get();
 setStickyTHeads()
-console.log(tables);
 
 function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
@@ -333,7 +332,6 @@ function populateUserModal(id) {
     {
         id
     });$.when(selectUserById).then(result => {
-        console.log(result)
         //Full name for Modal Title
         const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
         //Update Existing Personnel Object
@@ -611,8 +609,6 @@ $('#departments-tab').on('click', ()=>{
     sortDepartmentsTableByColumn(0, 'ASC');
 });
 
-
-console.log(headerHeight);
 $(window).on('resize', ()=> {
     setStickyTHeads()
 })
@@ -620,7 +616,8 @@ $(window).on('resize', ()=> {
 //Table headers stick just below search which moves to fit nav bar on smaller screens so sticky point must be reset
 function setStickyTHeads () {
     if ($(document).width()<= 617){
-        headerHeight = 150
+        headerHeight = 136
+        
         tables.forEach(table => {    
             $(`#${table}`).trigger('reflow')
         });
@@ -797,10 +794,8 @@ function createAlert (elementID, message, type) {
 
 $('#department-alert, #location-alert, #user-alert').on('click', ()=> {
     tables.forEach(table => {
-        console.log(table)
         $(`#${table}`).trigger('reflow')
     });
-    console.log('closed');
 })
 const toTopButton = document.getElementById('btn-back-to-top');
 $(toTopButton).on('click', ()=>backToTop());
@@ -1097,7 +1092,6 @@ function populateSearchDeptTable (result) {
     }
 }
 function populateSearchLocationTable (result) {
-    console.log(result)
     $('#search-location-table').html("")
     if(result.data.length == 0){
         $('#search-location-table').html(`
@@ -1118,7 +1112,6 @@ function populateSearchLocationTable (result) {
     }
 }
 function populateSearchPersonnelTable (result) {
-    console.log(result)
     $('#search-personnel-table').html("")
     if(result.data.length == 0){
         $('#search-personnel-table').html(`
@@ -1148,21 +1141,6 @@ function resetObject(objectName) {
     let keys = Object.keys(objectName).forEach(key => objectName[key]=null);
 }
 
-// function formIsFilled(objectName){
-//     let keys = Object.keys(objectName).forEach(key => {
-//         if(objectName[key] == null) {
-//             return false;
-//         }
-//         return true;
-//     });
-// }
-// function loadToolTips(){
-//     console.log('Firing')
-//     let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
-//     tooltipTriggerList.forEach(element => {
-//     });
-//     const tooltipList = [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl))}
-
 function capitalise(word) {
     if(!word){
       return;
@@ -1174,11 +1152,5 @@ function capitalise(word) {
     const capitalisedWords = words.join(" ");
     return capitalisedWords;
   }
-
-//   $(window).on('resize', function() {
-//     tables.forEach(table => {
-//       $(`#${table}`).trigger('reflow');
-//     });
-//   });
 
 $( document ).ready(getAllPersonnel(), getAllDepartments())
