@@ -357,7 +357,8 @@ function populateUserModal(id) {
 }
 
 
-$('#update-user').on('click', ()=> {
+$('#edit-user-form').on('submit', (e)=> {
+    e.preventDefault()
     //Check for new entries in Edit user modal or leave existing personnel object values:
     if($('#edit-user-forename').val()){
         existingPersonnel.firstName = capitalise($('#edit-user-forename').val()).trim()
@@ -390,7 +391,9 @@ $('#confirm-edit-dept').on('click', ()=> {
     updateDept(existingDepartment.name, existingDepartment.ID, existingDepartment.locationID)
 })
 
-$('#confirm-update-user').on('click', ()=> {
+$('#confirm-update-user').on('click', (event)=> {
+    event.preventDefault();
+    console.log('dsfdsfdsfsd')
     updateUser(existingPersonnel.firstName, existingPersonnel.surname, existingPersonnel.email, existingPersonnel.departmentID, existingPersonnel.id)
 })
 
