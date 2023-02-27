@@ -91,6 +91,7 @@ function populatePersonnelTable(result){
             </div></td>
         </tr>`)
         }
+    backToTop();
 }
 
 function populateEditDepartmentLocationDropown(locationID, colVal, direction){
@@ -130,7 +131,7 @@ function populateLocationsTable(result){
             <td class="text-end">${result.data[i].department_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                                 <button type="button" class="btn btn-light" data-id="${result.data[i].location_id}" data-bs-toggle="modal" data-bs-target="#edit-location-modal"><i class="fa-solid fa-pen"></i></button>
-                                <button type="button" class="btn btn-danger" data-id="${result.data[i].location_id}" data-bs-target="#delete-location-modal" data-bs-toggle="modal"><i class="fa-solid fa-trash"></i></button>
+                                <button type="button" class="btn btn-danger delete-location-btn" data-id="${result.data[i].location_id}"><i class="fa-solid fa-trash"></i></button>
                 </div></td>
         </tr>`)
         } else {
@@ -147,7 +148,8 @@ function populateLocationsTable(result){
             </tr>`)
         }
     }
-    loadToolTips()
+    loadToolTips();
+    backToTop();
 }
 
 function populateDepartmentsTable (result) {
@@ -161,7 +163,7 @@ function populateDepartmentsTable (result) {
             <td class="text-end d-none d-lg-table-cell">${result.data.departmentAndLocation[i].personnel_count}</td>
             <td><div class="container-fluid d-flex justify-content-around">
                             <button type="button" class="btn btn-light edit-dept-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
-                            <button type="button" class="btn btn-danger" data-id="${result.data.departmentAndLocation[i].deptID}" data-bs-target="#delete-department-modal" data-bs-toggle="modal"><i class="fa-solid fa-trash"></i></button>
+                            <button type="button" class="btn btn-danger delete-dept-btn" data-id="${result.data.departmentAndLocation[i].deptID}"><i class="fa-solid fa-trash"></i></button>
             </div></td>
         </tr>
         `)
@@ -182,7 +184,51 @@ function populateDepartmentsTable (result) {
         }
     }
     loadToolTips()
+    backToTop()
 }
+//Check Department is still empty before deleting
+$('#departments-table-body').on('click', '.delete-dept-btn', function () {
+    const id = $(this).attr('data-id')
+    const checkDept = new getData('./Back/checkDepartmentById.php', {
+        id
+    });$.when(checkDept).then((result)=> {
+        if(result.status.code === '200'){
+            if(result.data[0].departmentCount === 0){
+                populateDepartmentDeleteModal(id)
+                $('#delete-department-modal').modal('show');
+            } else {
+                $("#cant-delete-dept-name").text(result.data[0].departmentName);
+                $("#dept-count").text(result.data[0].departmentCount);
+                $('#cant-delete-dept-modal').modal('show');
+            }
+        } else {
+            createAlert('department-alert', 'Error retrieving data', 'warning');
+        } 
+    }, (err)=> console.log(err))
+})
+$('#cant-delete-dept-close').on('click', ()=>{
+    sortDepartmentsTableByColumn(0,'ASC');
+})
+
+$('#locations-table-body').on('click', '.delete-location-btn', function(){
+    const id = $(this).attr('data-id');
+    const checkLocation = new getData('./Back/checkLocationById.php', {
+        id
+    });$.when(checkLocation).then((result)=> {
+        if(result.status.code === '200'){
+            if(result.data[0].departmentCount === 0){
+                populateLocationDeleteModal(id)
+                $('#delete-location-modal').modal('show');
+            } else {
+                $("#cant-delete-location-name").text(result.data[0].locationName);
+                $("#location-count").text(result.data[0].departmentCount);
+                $('#cant-delete-location-modal').modal('show');
+            }
+        } else {
+            createAlert('location-alert', 'Error retrieving data', 'warning');
+        }
+    }, error => console.log(error))
+})
 
 //Populate Personnel Table
 function getAllPersonnel () {
@@ -246,7 +292,7 @@ function populateLocationModal(id) {
         $('#edit-location-name').attr('placeholder', result.data[0].name)
     })
 }
-$('#update-location').on('click', (event)=> {
+$('#edit-location-form').on('submit', (event)=> {
     event.preventDefault()
     if($('#edit-location-name').val()){
         existingLocation.name = capitalise($('#edit-location-name').val().trim())
@@ -357,8 +403,8 @@ function populateUserModal(id) {
 }
 
 
-$('#edit-user-form').on('submit', (e)=> {
-    e.preventDefault()
+$('#edit-user-form').on('submit', (event)=> {
+    event.preventDefault()
     //Check for new entries in Edit user modal or leave existing personnel object values:
     if($('#edit-user-forename').val()){
         existingPersonnel.firstName = capitalise($('#edit-user-forename').val()).trim()
@@ -393,7 +439,6 @@ $('#confirm-edit-dept').on('click', ()=> {
 
 $('#confirm-update-user').on('click', (event)=> {
     event.preventDefault();
-    console.log('dsfdsfdsfsd')
     updateUser(existingPersonnel.firstName, existingPersonnel.surname, existingPersonnel.email, existingPersonnel.departmentID, existingPersonnel.id)
 })
 
@@ -487,8 +532,9 @@ function confirmEditDepartment(departmentName, locationId, location){
     $('#confirm-edit-dept-location').html(location);
 }
 
-$('#update-dept').on('click', ()=> {
+$('#edit-dept-form').on('submit', (event)=> {
     //Check for new entries in Edit user modal or leave existing personnel object values:
+    event.preventDefault();
     if($('#edit-dept-name').val()){
         existingDepartment.name = capitalise($('#edit-dept-name').val()).trim()
     } 
@@ -594,20 +640,6 @@ deleteUserModal.addEventListener('show.bs.modal', event => {
     populateUserDeleteModal(userId);
 })
 
-const deleteDepartmentModal = document.getElementById('delete-department-modal');
-deleteDepartmentModal.addEventListener('show.bs.modal', event => {
-    const button = event.relatedTarget;
-    const departmentID = button.getAttribute('data-id');
-    populateDepartmentDeleteModal(departmentID);
-})
-
-const deleteLocationModal = document.getElementById('delete-location-modal');
-deleteLocationModal.addEventListener('show.bs.modal', event => {
-    const button = event.relatedTarget;
-    const locationID = button.getAttribute('data-id');
-    populateLocationDeleteModal(locationID);
-})
-
 $('#departments-tab').on('click', ()=>{
     sortDepartmentsTableByColumn(0, 'ASC');
 });
@@ -643,7 +675,54 @@ $(".sticky-header").floatThead({
 let personnelFormInputs = $('#create-user-form')
 let departmentFormInputs = $('#create-dept-form')
 let locationFormInputs = $('#create-location-form')
-//Check create user/dept/location form is filled out, 'create' button stays inactive until formValid == true:
+
+$('#cancel-create-user').on('click', (event)=> {
+    //Check at least one form input has a value before asking user to confirm cancel:
+    let formInputArray = personnelFormInputs.serializeArray()
+    const formValid = formInputArray.some(input => input.value.trim() !== "")
+    if(formValid){
+        if (confirm('Warning: You have unsaved changes. Are you sure you want to cancel?')){
+            $('#create-user-modal').modal('hide');
+            sortPersonnelTableByColumn(0, 'ASC');
+        } else {
+            event.preventDefault();
+        }
+    } else {
+        $('#create-user-modal').modal('hide');
+    }
+})
+
+$('#cancel-create-dept').on('click', (event)=> {
+//Check at least one form input has a value before asking user to confirm cancel:
+    const formValid =  $('#create-dept-name').val().trim() !== "";
+    if(formValid){
+        if (confirm('Warning: You have unsaved changes. Are you sure you want to cancel?')){
+            sortDepartmentsTableByColumn (0, 'ASC')
+            $('#create-dept-modal').modal('hide');
+        } else {
+            event.preventDefault();
+        }
+    } else {
+        $('#create-dept-modal').modal('hide');
+    }
+})
+
+$('#cancel-create-location').on('click', (event)=> {
+//Check at least one form input has a value before asking user to confirm cancel:
+    const formValid = $('#create-location-name').val().trim() !== "";
+    if(formValid){
+        if(confirm('Warning: You have unsaved changes. Are you sure you want to cancel?')){
+            sortLocationsTableByColumn(0, 'ASC');
+            $('#create-location-modal').modal('hide');
+        } else {
+            event.preventDefault();
+        }
+    } else {
+        $('#create-location-modal').modal('hide');
+    }
+})
+
+//Check each create user/dept/location form input has a value, 'create' button stays inactive until formValid == true:
 $('#create-user-form').on('keyup', ()=> {
     let formInputArray = personnelFormInputs.serializeArray()
     const formValid = formInputArray.every(input => input.value.trim() !== "")
@@ -713,8 +792,8 @@ $('#create-location-form').on('keyup', ()=> {
     }
 })
 
-$('#add-personnel').on('click', function (event) {
-    event.preventDefault;
+$('#create-user-form').on('submit', function (event) {
+    event.preventDefault();
     resetObject(newPersonnel)
         //Update newPersonnelObject
         newPersonnel.firstName = capitalise($('#create-user-firstname').val().trim());
@@ -726,8 +805,8 @@ $('#add-personnel').on('click', function (event) {
         confirmCreateNewUser(newPersonnel.firstName, newPersonnel.surname, newPersonnel.email, newPersonnel.department)
 })
 
-$('#add-location').on('click', event => {
-    event.preventDefault;
+$('#create-location-form').on('submit', event => {
+    event.preventDefault();
     newLocationName = capitalise($('#create-location-name').val().trim());
     confirmCreateLocation(newLocationName)
 })
@@ -737,8 +816,8 @@ $('#create-dept-btn').on('click', ()=>{
     $('#create-dept-name').html("");
 });
 
-$('#add-dept').on('click', event => {
-    event.preventDefault;
+$('#create-dept-form').on('submit', event => {
+    event.preventDefault();
     newDepartment.name = capitalise($('#create-dept-name').val().trim());
     newDepartment.location = $('#dept-location-dropdown option:selected').text();
     newDepartment.locationID = $('#dept-location-dropdown').val();
@@ -987,12 +1066,10 @@ $('.btn-sort').on('click', function () {
 
 $('#locations-tab').on('click', ()=> {
     sortLocationsTableByColumn(0, 'ASC')
-    // headerHeight = $('#location-global').outerHeight(true);
 })
 
 $('#personnel-search-addon-btn').on('click', ()=> {
     const userVal = $('#personnel-search-input').val()
-    // const columnVal = $('#personnel-search-select').val()
     searchPersonnelTable(userVal);
 })
 
@@ -1000,10 +1077,7 @@ $('#dept-search-addon-btn').on('click', ()=> {
     const deptVal = $('#dept-search-input').val()
     searchDeptTable(deptVal)
 })
-// const deptSearchModal = document.getElementById('dept-search-modal');
-// deptSearchModal.addEventListener('show.bs.modal', event => {
-//     const button = event.relatedTarget;
-// })
+
 
 $('#location-search-addon-btn').on('click', ()=> {
     const locationVal = $('#location-search-input').val()
@@ -1074,7 +1148,6 @@ function searchLocationTable (searchVal) {
 }
 //Display results from search to user
 function populateSearchDeptTable (result) {
-    console.log(result)
     $('#search-dept-table').html("")
     if(result.data.length == 0){
         $('#search-dept-table').html(`
@@ -1156,4 +1229,4 @@ function capitalise(word) {
     return capitalisedWords;
   }
 
-$( document ).ready(getAllPersonnel(), getAllDepartments())
+$( document ).ready(getAllPersonnel())
