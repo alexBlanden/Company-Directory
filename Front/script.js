@@ -82,7 +82,7 @@ function populatePersonnelTable(result){
             $('#personnel-table-body').append(`<tr>
             <td data-id="${result.data[i].id}">${result.data[i].lastName}</td>
             <td>${result.data[i].firstName}</td>
-            <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
+            <td class="d-none d-lg-table-cell"><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
             <td class="d-none d-lg-table-cell">${result.data[i].department}</td>
             <td class="d-none d-lg-table-cell">${result.data[i].location}</td>
             <td><div class="container-fluid d-flex justify-content-around">
@@ -91,7 +91,9 @@ function populatePersonnelTable(result){
             </div></td>
         </tr>`)
         }
+    $(window).trigger('resize');
     backToTop();
+
 }
 
 function populateEditDepartmentLocationDropown(locationID, colVal, direction){
@@ -149,6 +151,7 @@ function populateLocationsTable(result){
         }
     }
     loadToolTips();
+    $(window).trigger('resize');
     backToTop();
 }
 
@@ -184,6 +187,7 @@ function populateDepartmentsTable (result) {
         }
     }
     loadToolTips()
+    $(window).trigger('resize');
     backToTop()
 }
 //Check Department is still empty before deleting
@@ -363,6 +367,7 @@ function getAllDepartments () {
     var getDepartments = new getData('./Back/getAllDepartments.php', {
 
     });$.when(getDepartments).then((result)=> {
+        console.log(result)
         $('#edit-user-dept').html("")
         $('#create-user-dept').html("")
         for(let i = 0; i < result.data.length; i++){
@@ -1229,4 +1234,4 @@ function capitalise(word) {
     return capitalisedWords;
   }
 
-$( document ).ready(getAllPersonnel())
+$( document ).ready(sortPersonnelTableByColumn(0, 'ASC'), getAllDepartments())
