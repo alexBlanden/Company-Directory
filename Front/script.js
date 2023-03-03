@@ -293,15 +293,33 @@ function populateLocationModal(id) {
         id
     });$.when(selectLocationByID).then(result => {
         existingLocation.name = result.data[0].name
-        $('#edit-location-name').attr('placeholder', result.data[0].name)
+        $('#edit-location-name').val(result.data[0].name)
+        $('#location-id').val(result.data[0].id)
     })
 }
 $('#edit-location-form').on('submit', (event)=> {
     event.preventDefault()
-    if($('#edit-location-name').val()){
-        existingLocation.name = capitalise($('#edit-location-name').val().trim())
-    }
-    $('#confirm-update-location-name').html(existingLocation.name)
+    let existingLocationName = capitalise($('#edit-location-name').val().trim());
+    let id = $('#location-id').val()
+    var sendLocation = new getData('./Back/updateLocation.php', 
+    {
+        id,
+        existingLocationName
+    });$.when(sendLocation).then(result => {
+        if(result.status.code = 200){
+            $('#edit-location-modal').modal('hide');
+            createAlert('location-alert', result.status.description, 'success')
+            resetObject(existingLocation)
+            sortLocationsTableByColumn(0,'ASC');
+        }
+    }, err => {
+        console.log(err)
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            createAlert('location-alert', "ERROR: Location Name Must Be Unique", 'warning')
+        } else {
+            createAlert('location-alert', `WARNING: ${err.responseText}`, 'warning' )
+        }
+    })
 })
 
 $('#confirm-update-location').on('click', ()=> {
@@ -323,22 +341,7 @@ function deleteLocation(id){
 }
 
 function updateLocation (id, name) {
-    var sendLocation = new getData('./Back/updateLocation.php', 
-    {
-        id,
-        name
-    });$.when(sendLocation).then(result => {
-        createAlert('location-alert', result.status.description, 'success')
-        resetObject(existingLocation)
-        sortLocationsTableByColumn(0,'ASC');
-    }, err => {
-        console.log(err)
-        if(err.responseText.indexOf("Duplicate entry") !== -1){
-            createAlert('location-alert', "ERROR: Location Name Must Be Unique", 'warning')
-        } else {
-            createAlert('location-alert', `WARNING: ${err.responseText}`, 'warning' )
-        }
-    })
+    
 }
 //Delete user
 function deleteUser(id) {
@@ -378,76 +381,32 @@ function getAllDepartments () {
     });
 }
 //Fetch user details for edit
-function populateUserModal(id) {
-    var selectUserById = new getData('./Back/getPersonnelByID.php', 
-    {
-        id
-    });$.when(selectUserById).then(result => {
-        //Full name for Modal Title
-        const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
-        //Update Existing Personnel Object
-        existingPersonnel.firstName = result.data.personnel[0].firstName;
-        existingPersonnel.surname = result.data.personnel[0].lastName;
-        existingPersonnel.email = result.data.personnel[0].email;
-        existingPersonnel.id = result.data.personnel[0].id;
-        existingPersonnel.departmentID = result.data.personnel[0].departmentID;
-        existingPersonnel.departmentName = result.data.personnel[0].departmentName;
-        //Use Object Values to Populate Placeholder Text
-        $('#edit-user-title').html(fullName)
-        $('#edit-user-forename').attr('placeholder', existingPersonnel.firstName);
-        $('#edit-user-surname').attr('placeholder', existingPersonnel.surname);
-        $('#edit-user-email').attr('placeholder', existingPersonnel.email);
 
-        $('#edit-user-dept').html("");
-        for(let i = 0; i < result.data.department.length; i++){
-            $('#edit-user-dept').append(`<option value="${result.data.department[i].id}">${result.data.department[i].name}</option>
-        `)}
-
-        $('#edit-user-dept').val(result.data.personnel[0].departmentID);
-    })
-}
 
 
 $('#edit-user-form').on('submit', (event)=> {
     event.preventDefault()
+    let personnelID,
+    firstName,
+    lastName,
+    email,
+    departmentName,
+    departmentID;
     //Check for new entries in Edit user modal or leave existing personnel object values:
+    personnelID = $('#employeeID').val()
     if($('#edit-user-forename').val()){
-        existingPersonnel.firstName = capitalise($('#edit-user-forename').val()).trim()
+        firstName = capitalise($('#edit-user-forename').val()).trim()
     }
 
     if($('#edit-user-surname').val()){
-        existingPersonnel.surname = capitalise($('#edit-user-surname').val()).trim()
+        lastName = capitalise($('#edit-user-surname').val()).trim()
     }
 
     if($('#edit-user-email').val()){
-        existingPersonnel.email = $('#edit-user-email').val().trim()
+        email = $('#edit-user-email').val().trim()
     }
-    existingPersonnel.departmentName = $('#edit-user-dept option:selected').text()
-    existingPersonnel.departmentID = $('#edit-user-dept').val()
-    confirmUpdateUser()
-})
-//Populate modal asking users for confirmation
-function confirmUpdateUser(){   
-    $('#confirm-update-firstname').html(existingPersonnel.firstName)
-    $('#confirm-update-surname').html(existingPersonnel.surname)
-    $('#confirm-update-email').html(existingPersonnel.email)
-    $('#confirm-update-department').html(existingPersonnel.departmentName)
-}
-function confirmUpdateDepartment() {
-    $('#confirm-edit-dept-name').html(existingDepartment.name)
-    $('#confirm-edit-dept-location').html(existingDepartment.location)
-}
-
-$('#confirm-edit-dept').on('click', ()=> {
-    updateDept(existingDepartment.name, existingDepartment.ID, existingDepartment.locationID)
-})
-
-$('#confirm-update-user').on('click', (event)=> {
-    event.preventDefault();
-    updateUser(existingPersonnel.firstName, existingPersonnel.surname, existingPersonnel.email, existingPersonnel.departmentID, existingPersonnel.id)
-})
-
-function updateUser (firstName, lastName, email, departmentID, personnelID) {
+    departmentName = $('#edit-user-dept option:selected').text()
+    departmentID = $('#edit-user-dept').val()
     var sendUserDetails = new getData('./Back/updatePersonnel.php',
     {
         firstName,
@@ -456,6 +415,7 @@ function updateUser (firstName, lastName, email, departmentID, personnelID) {
         departmentID,
         personnelID
     });$.when(sendUserDetails).then(result => {
+        $('#edit-user-modal').modal('hide');
         createAlert('user-alert', result.status.description, 'success');
         resetObject(existingPersonnel);
         sortPersonnelTableByColumn(0, 'ASC');
@@ -467,34 +427,22 @@ function updateUser (firstName, lastName, email, departmentID, personnelID) {
             createAlert('location-alert', `ERROR: ${err.responseText}`, 'warning' )
         }
     })
+})
+
+function confirmUpdateDepartment() {
+    $('#confirm-edit-dept-name').html(existingDepartment.name)
+    $('#confirm-edit-dept-location').html(existingDepartment.location)
 }
 
+$('#confirm-edit-dept').on('click', ()=> {
+    updateDept(existingDepartment.name, existingDepartment.ID, existingDepartment.locationID)
+})
+
+
 function updateDept(name, ID, locationID){
-    var sendDeptDetails = new getData('./Back/updateDept.php', 
-    {
-        name,
-        ID,
-        locationID
-    });$.when(sendDeptDetails).then((result)=> {
-        createAlert('department-alert', result.status.description, 'success');
-        resetObject(existingDepartment);
-        sortDepartmentsTableByColumn(0, 'ASC');
-    }, err => {
-        console.log(err)
-        if(err.responseText.indexOf("Duplicate entry") !== -1){
-            createAlert('department-alert', "ERROR: Department name must be unique", 'warning')
-        } else {
-            createAlert('deparment-alert', `ERROR: ${err.responseText}`, 'warning' )
-        }
-    })
+    
 }
-//Display message asking user to confirm creation 
-function confirmCreateNewUser(firstName, surname, email, department){
-    $('#confirm-create-firstname').html(firstName)
-    $('#confirm-create-surname').html(surname)
-    $('#confirm-create-email').html(email)
-    $('#confirm-create-department').html(department)
-}
+
 
 function confirmCreateLocation (locationName) {
     $('#confirm-create-location-name').html(locationName)
@@ -506,30 +454,8 @@ $('#confirm-add-personnel').on('click', ()=>{
 })
 
 function addLocation(name){
-    var insertLocation = new getData('./Back/insertLocation.php', 
-    {
-        name,
-    });$.when(insertLocation).then((result)=> {
-        $('#create-location-name').html("");
-        // sortDepartmentsTableByColumn(0, 'ASC');
-        sortLocationsTableByColumn(0, 'ASC')
-        createAlert('location-alert', result.status.description, 'success');
-    }, err => {
-        if(err.responseText.indexOf("Duplicate entry") !== -1){
-            createAlert('location-alert', "ERROR: Location already exists", 'warning')
-        } else {
-            createAlert('location-alert', `ERROR: ${err.responseText}`, 'warning' )
-        }
-        console.log(err)
-    })
 }
 
-function confirmCreateNewDept(departmentName, locationId, location){
-    $('#confirm-create-dept-name').html("");
-    $('#confirm-create-dept-location').html("");
-    $('#confirm-create-dept-name').html(departmentName);
-    $('#confirm-create-dept-location').html(location);
-}
 function confirmEditDepartment(departmentName, locationId, location){
     $('#confirm-edit-dept-name').html("");
     $('#confirm-edit-dept-location').html("");
@@ -540,62 +466,43 @@ function confirmEditDepartment(departmentName, locationId, location){
 $('#edit-dept-form').on('submit', (event)=> {
     //Check for new entries in Edit user modal or leave existing personnel object values:
     event.preventDefault();
+    let existingDepartmentName,
+    existingDepartmentID,
+    existingDepartmentLocation,
+    existingDepartmentLocationID
+
+    existingDepartmentID = $('#dept-id').val()
     if($('#edit-dept-name').val()){
-        existingDepartment.name = capitalise($('#edit-dept-name').val()).trim()
+        existingDepartmentName = capitalise($('#edit-dept-name').val()).trim()
     } 
-    existingDepartment.location = $('#edit-dept-location option:selected').text()
-    existingDepartment.locationID = $('#edit-dept-location').val()
-    confirmUpdateDepartment()
+    existingDepartmentLocation = $('#edit-dept-location option:selected').text()
+    existingDepartmentLocationID = $('#edit-dept-location').val()
+    var sendDeptDetails = new getData('./Back/updateDept.php', 
+    {
+        existingDepartmentName,
+        existingDepartmentID,
+        existingDepartmentLocationID
+    });$.when(sendDeptDetails).then((result)=> {
+        if(result.status.code == 200){
+            $('#edit-dept-modal').modal('hide')
+            createAlert('department-alert', result.status.description, 'success');
+            resetObject(existingDepartment);
+            sortDepartmentsTableByColumn(0, 'ASC');
+        }
+    }, err => {
+        console.log(err)
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            $('#edit-dept-modal').modal('hide')
+            createAlert('department-alert', "ERROR: Department name must be unique", 'warning')
+        } else {
+            $('#edit-dept-modal').modal('hide')
+            createAlert('deparment-alert', `ERROR: ${err.responseText}`, 'warning' )
+        }
+    })
 })
 
 $('#confirm-add-dept').on('click', ()=> addDepartment(newDepartment.name, newDepartment.locationID));
 $('#confirm-add-location').on('click', ()=> addLocation(newLocationName));
-
-function addDepartment (name, locationId) {
-    var insertDepartment = new getData('./Back/insertDepartment.php', 
-    {
-        name,
-        locationId
-    });$.when(insertDepartment).then((result)=> {
-        // $('#create-dept-name').html("");
-        sortDepartmentsTableByColumn(0, 'ASC');
-        createAlert('department-alert', result.status.description, 'success');
-    }, err => {
-        console.log(err)
-        if(err.responseText.indexOf("Duplicate entry") !== -1){
-            createAlert('department-alert', "ERROR: Department already exists", 'warning')
-        } else {
-            createAlert('department-alert', `WARNING: ${err.responseText}`, 'warning' )
-        }
-    })
-
-}
-//Upon confirm, create new user
-function createNewUser(firstName, lastName, email, departmentID){
-    var insertUser = new getData('./Back/insertUser.php', 
-    {
-        firstName,
-        lastName,
-        email,
-        departmentID,
-    });$.when(insertUser).then(
-        (result)=>{
-        resetObject(newPersonnel);
-        getAllPersonnel(); 
-        createAlert('user-alert', result.status.description, 'success');
-        scrollFunction();
-    },
-     (err)=> {
-        console.log(err);
-        //Search response error, if 'Duplicate entry' string exists, email is already used as it's the only unique field:
-        if(err.responseText.indexOf("Duplicate entry") !== -1){
-            createAlert('user-alert', "ERROR: A member of Personnel with that email already exists", 'warning')
-        } else {
-            createAlert('user-alert', `WARNING: ${err.responseText}`, 'warning' )
-        }
-    })
-}
-
 
 function loadToolTips(){
     let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -606,8 +513,31 @@ function loadToolTips(){
 const editUserModal = document.getElementById('edit-user-modal');
 editUserModal.addEventListener('show.bs.modal', event => {
     const button = event.relatedTarget;
-    const userId = button.getAttribute('data-id');
-    populateUserModal(userId)
+    const id = button.getAttribute('data-id');
+    var selectUserById = new getData('./Back/getPersonnelByID.php', 
+    {
+        id
+    });$.when(selectUserById).then(result => {
+        console.log(result);
+        if(result.status.code == 200){
+        //Full name for Modal Title
+        const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
+        $('#edit-user-title').html(fullName)
+        $('#employeeID').val(result.data.personnel[0].id);
+        $('#edit-user-forename').val(result.data.personnel[0].firstName);
+        $('#edit-user-surname').val(result.data.personnel[0].lastName);
+        $('#edit-user-email').val(result.data.personnel[0].email);
+        $('#edit-user-dept').html("");
+        for(let i = 0; i < result.data.department.length; i++){
+            $('#edit-user-dept').append(`<option value="${result.data.department[i].id}">${result.data.department[i].name}</option>
+        `)}
+        $('#edit-user-dept').val(result.data.personnel[0].departmentID);
+    } else {
+        $('#edit-user-title').html('Error Retrieving Data')
+    }
+    }, error => {
+        $('#edit-user-modal').html('Error Retrieving Data');
+    })
 })
 
 const editDepartmentModal = document.getElementById('edit-dept-modal');
@@ -632,9 +562,9 @@ function populateDepartmentModal (id) {
     {
         id
     });$.when(selectDepartmentByID).then(result => {
-        existingDepartment.ID = result.data[0].id;
-        existingDepartment.name = result.data[0].name
-        $('#edit-dept-name').attr('placeholder', existingDepartment.name)
+        console.log(result)
+        $('#edit-dept-name').val(result.data[0].name)
+        $('#dept-id').val(result.data[0].id)
     }, error=> console.log(error))
 }
 //Fetch user-id from button data attribute to create confirm delete message
@@ -732,17 +662,11 @@ $('#create-user-form').on('keyup', ()=> {
     let formInputArray = personnelFormInputs.serializeArray()
     const formValid = formInputArray.every(input => input.value.trim() !== "")
     if(formValid){
-        $('#add-personnel').attr({
-            'data-bs-toggle': "modal"
-        })
         $('#add-personnel > button').attr({
             'disabled': false,
             'title': ""
         })
     } else {
-        $('#add-personnel').attr({
-            'data-bs-toggle': ""
-        })
         $('#add-personnel > button').attr({
             'disabled': true,
             'data-bs-toggle': "tooltip",
@@ -755,17 +679,11 @@ $('#create-dept-form').on('keyup', ()=> {
     let deptFormInputArray = departmentFormInputs.serializeArray()
     const formValid = deptFormInputArray.every(input => input.value.trim() !== "")
     if(formValid){
-        $('#add-dept').attr({
-            'data-bs-toggle': "modal"
-        })
         $('#add-dept > button').attr({
             'disabled': false,
             'title': ""
         })
     } else {
-        $('#add-dept').attr({
-            'data-bs-toggle': ""
-        })
         $('#add-dept > button').attr({
             'disabled': true,
             'data-bs-toggle': "tooltip",
@@ -778,17 +696,12 @@ $('#create-location-form').on('keyup', ()=> {
     let locationFormInputArray = locationFormInputs.serializeArray()
     const formValid = locationFormInputArray.every(input => input.value.trim() !== "")
     if(formValid){
-        $('#add-location').attr({
-            'data-bs-toggle': "modal"
-        })
         $('#add-location > button').attr({
             'disabled': false,
-            'title': ""
-        })
-    } else {
-        $('#add-location').attr({
+            'title': "",
             'data-bs-toggle': ""
         })
+    } else {
         $('#add-location > button').attr({
             'disabled': true,
             'data-bs-toggle': "tooltip",
@@ -801,19 +714,66 @@ $('#create-user-form').on('submit', function (event) {
     event.preventDefault();
     resetObject(newPersonnel)
         //Update newPersonnelObject
-        newPersonnel.firstName = capitalise($('#create-user-firstname').val().trim());
-        newPersonnel.surname = capitalise($('#create-user-surname').val().trim());
-        newPersonnel.email = $('#create-user-email').val().trim();
-        newPersonnel.department = $("#create-user-dept option:selected").text();
-        newPersonnel.departmentID = $('#create-user-dept').val();
+    let firstName = capitalise($('#create-user-firstname').val().trim());
+    let lastName = capitalise($('#create-user-surname').val().trim());
+    let email = $('#create-user-email').val().trim();
+    let department = $("#create-user-dept option:selected").text();
+    let departmentID = $('#create-user-dept').val();
         //Display newPersonnelObject to user in modal and ask to confirm action
-        confirmCreateNewUser(newPersonnel.firstName, newPersonnel.surname, newPersonnel.email, newPersonnel.department)
+        var insertUser = new getData('./Back/insertUser.php', 
+    {
+        firstName,
+        lastName,
+        email,
+        departmentID,
+    });$.when(insertUser).then(
+        (result)=>{
+        if(result.status.code == 200){
+            $('#create-user-modal').modal('hide');
+            $('#create-user-form')[0].reset();
+            console.log(result)
+            resetObject(newPersonnel);
+            getAllPersonnel(); 
+            createAlert('user-alert', result.status.description, 'success');
+            scrollFunction()
+        } else {
+           createAlert('user-alert', 'Error Communicating with Database', 'warning');
+        };
+    },
+     (err)=> {
+        console.log(err);
+        //Search response error, if 'Duplicate entry' string exists, email is already used as it's the only unique field:
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            createAlert('user-alert', "ERROR: A member of Personnel with that email already exists", 'warning')
+        } else {
+            createAlert('user-alert', `WARNING: ${err.responseText}`, 'warning' )
+        }
+    })
 })
 
 $('#create-location-form').on('submit', event => {
     event.preventDefault();
-    newLocationName = capitalise($('#create-location-name').val().trim());
-    confirmCreateLocation(newLocationName)
+    let locationName = capitalise($('#create-location-name').val().trim());
+    var insertLocation = new getData('./Back/insertLocation.php', 
+    {
+        locationName,
+    });$.when(insertLocation).then((result)=> {
+        if(result.status.code == 200){
+            $('#create-location-name').html("");
+            $('#create-location-modal').modal('hide');
+            sortLocationsTableByColumn(0, 'ASC')
+            createAlert('location-alert', result.status.description, 'success');
+        } else {
+            createAlert('location-alert', result.status.description, 'warning');
+        }
+    }, err => {
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            createAlert('location-alert', "ERROR: Location already exists", 'warning')
+        } else {
+            createAlert('location-alert', `ERROR: ${err.responseText}`, 'warning' )
+        }
+        console.log(err)
+    })
 })
 $('#create-dept-btn').on('click', ()=>{
     //For some reason sortLocationsByColumn also populates locations dropdown menu in create department modal. Must change!
@@ -823,10 +783,32 @@ $('#create-dept-btn').on('click', ()=>{
 
 $('#create-dept-form').on('submit', event => {
     event.preventDefault();
-    newDepartment.name = capitalise($('#create-dept-name').val().trim());
-    newDepartment.location = $('#dept-location-dropdown option:selected').text();
-    newDepartment.locationID = $('#dept-location-dropdown').val();
-    confirmCreateNewDept(newDepartment.name, newDepartment.locationID, newDepartment.location);
+    let newDepartmentName = capitalise($('#create-dept-name').val().trim()),
+    newDepartmentLocation = $('#dept-location-dropdown option:selected').text(),
+    locationId = $('#dept-location-dropdown').val();
+    var insertDepartment = new getData('./Back/insertDepartment.php', 
+    {
+        newDepartmentName,
+        locationId
+    });$.when(insertDepartment).then((result)=> {
+        if(result.status.code == 200){
+            $('#create-dept-modal').modal('hide');
+            sortDepartmentsTableByColumn(0, 'ASC');
+            createAlert('department-alert', result.status.description, 'success');
+        } else {
+            $('#create-dept-modal').modal('hide');
+            createAlert('department-alert', result.status.description, 'warning');    
+        }
+    }, err => {
+        console.log(err)
+        if(err.responseText.indexOf("Duplicate entry") !== -1){
+            $('#create-dept-modal').modal('hide');
+            createAlert('department-alert', "ERROR: Department already exists", 'warning')
+        } else {
+            $('#create-dept-modal').modal('hide');
+            createAlert('department-alert', `WARNING: ${err.responseText}`, 'warning' )
+        }
+    })
 })
 
 //Table Sort Functions:
@@ -895,14 +877,11 @@ function scrollFunction() {
     }
 }
 
-
 //Reset vertical scroll
 function backToTop () {
     document.body.scrollTop = 0;
     document.documentElement.scrollTop = 0;
 }
-
-
 
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
 $('#p-surname').on('click', ()=> {

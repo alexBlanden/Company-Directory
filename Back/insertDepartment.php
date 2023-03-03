@@ -39,7 +39,7 @@
 
 	$query = $conn->prepare('INSERT INTO department (name, locationID) VALUES(?,?)');
 
-	$query->bind_param("si", $_POST['name'], $_POST['locationId']);
+	$query->bind_param("si", $_POST['newDepartmentName'], $_POST['locationId']);
 
 	$query->execute();
 	
