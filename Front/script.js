@@ -11,41 +11,6 @@ var getData = function (address, query) {
 
 var headerHeight;
 
-var existingPersonnel = {
-    firstName: null,
-    surname: null,
-    email: null,
-    id: null,
-    departmentID: null,
-    departmentName: null
-}
-
-var newPersonnel = {
-    firstName: null,
-    surname: null,
-    email: null,
-    department: null,
-    departmentID: null
-}
-
-var existingDepartment = {
-    name: null,
-    ID: null,
-    location: null,
-    locationID: null
-}
-var newDepartment = {
-    name: null,
-    location: null,
-    locationID: null
-}
-
-var existingLocation = {
-    name: null,
-    id: null
-}
-
-var newLocationName;
 window.onscroll = function () {
     scrollFunction();
 }
@@ -250,16 +215,25 @@ function populateUserDeleteModal(id){
     {
         id
     });$.when(selectUserById).then(result => {
-        existingPersonnel.firstName = result.data.personnel[0].firstName
-        existingPersonnel.surname = result.data.personnel[0].lastName
-        existingPersonnel.id = result.data.personnel[0].id
-        $('#confirm-delete-user').html(`Are you sure you want to delete ${existingPersonnel.firstName} ${existingPersonnel.surname}? You cannot undo this action`)
+        let existingPersonnelfirstName = result.data.personnel[0].firstName;
+        let existingPersonnelsurname = result.data.personnel[0].lastName;
+        let existingPersonnelid = result.data.personnel[0].id;
+        $('#confirm-delete-user').html(`Are you sure you want to delete ${existingPersonnelfirstName} ${existingPersonnelsurname}? You cannot undo this action`);
+        $('#confirm-delete-user-id').html(existingPersonnelid);
     })
 }
 
 $('#confirm-delete-user-button').on('click', ()=>{
-    deleteUser(existingPersonnel.id);
-    resetObject(existingPersonnel);
+    let existingPersonnelid = $('#confirm-delete-user-id').html();
+    // deleteUser(existingPersonnelid);
+    var deletePersonnel = new getData('./Back/deleteUserByID.php', 
+    {
+        existingPersonnelid
+    });$.when(deletePersonnel).then(result => {
+        createAlert('user-alert', result.data, 'danger')
+        getAllPersonnel()
+        backToTop();
+    }, err => console.log(err))
 })
 
 function populateDepartmentDeleteModal (id) {
@@ -267,14 +241,22 @@ function populateDepartmentDeleteModal (id) {
     {
         id
     });$.when(selectDepartmentByID).then(result => {
-        existingDepartment.ID = result.data[0].id;
-        existingDepartment.name = result.data[0].name
-        $('#confirm-delete-department').html(`Are you sure you want to delete ${existingDepartment.name}? You cannot undo this action`)
+        let existingDepartmentID = result.data[0].id;
+        let existingDepartmentName = result.data[0].name
+        $('#confirm-delete-department').html(`Are you sure you want to delete ${existingDepartmentName}? You cannot undo this action`)
+        $('#confirm-delete-department-id').html(existingDepartmentID)
     }, error=> console.log(error))
 }
 $('#confirm-delete-department-button').on('click', ()=>{
-    deleteDepartment(existingDepartment.ID);
-    resetObject(existingDepartment);
+    let existingDepartmentID = $('#confirm-delete-department-id').html();
+    var deleteDepartmentByID = new getData('./Back/deleteDepartmentByID.php',
+    {
+        existingDepartmentID
+    });$.when(deleteDepartmentByID).then(result => {
+        createAlert('department-alert', result.status.description, 'danger');
+        sortDepartmentsTableByColumn(0, 'ASC');
+        backToTop();
+    })
 });
 
 function populateLocationDeleteModal (id) {
@@ -282,8 +264,9 @@ function populateLocationDeleteModal (id) {
     {
         id
     });$.when(selectLocationByID).then(result => {
-        existingLocation.id = result.data[0].id;
-        $('#confirm-delete-location').html(`Are you sure you want to delete ${result.data[0].name}? You cannot undo this action`)
+        let existingLocationid = result.data[0].id;
+        $('#confirm-delete-location').html(`Are you sure you want to delete ${result.data[0].name}? You cannot undo this action`);
+        $('#confirm-delete-location-id').html(existingLocationid);
     }, error=> console.log(error))
 }
 
@@ -309,7 +292,6 @@ $('#edit-location-form').on('submit', (event)=> {
         if(result.status.code = 200){
             $('#edit-location-modal').modal('hide');
             createAlert('location-alert', result.status.description, 'success')
-            resetObject(existingLocation)
             sortLocationsTableByColumn(0,'ASC');
         }
     }, err => {
@@ -322,55 +304,25 @@ $('#edit-location-form').on('submit', (event)=> {
     })
 })
 
-$('#confirm-update-location').on('click', ()=> {
-    updateLocation(existingLocation.id, existingLocation.name);
-})
+
 $('#confirm-delete-location-button').on('click', ()=>{
-    deleteLocation(existingLocation.id);
-    resetObject(existingLocation);
-});
-function deleteLocation(id){
+    let existingLocationid = $('#confirm-delete-location-id').html();
+    // deleteLocation(existingLocationid);
     var deleteLocationByID = new getData('./Back/deleteLocationByID.php',
     {
-        id
+        existingLocationid
     });$.when(deleteLocationByID).then(result => {
         createAlert('location-alert', result.status.description, 'danger');
         sortLocationsTableByColumn(0, 'ASC');
         backToTop();
     })
-}
+});
 
-function updateLocation (id, name) {
-    
-}
-//Delete user
-function deleteUser(id) {
-    var deletePersonnel = new getData('./Back/deleteUserByID.php', 
-    {
-        id
-    });$.when(deletePersonnel).then(result => {
-        createAlert('user-alert', result.data, 'danger')
-        getAllPersonnel()
-        backToTop();
-    }, err => console.log(err))
-}
-
-function deleteDepartment(id){
-    var deleteDepartmentByID = new getData('./Back/deleteDepartmentByID.php',
-    {
-        id
-    });$.when(deleteDepartmentByID).then(result => {
-        createAlert('department-alert', result.status.description, 'danger');
-        sortDepartmentsTableByColumn(0, 'ASC');
-        backToTop();
-    })
-}
 //Populate dropdown select menu for create user
 function getAllDepartments () {
     var getDepartments = new getData('./Back/getAllDepartments.php', {
 
     });$.when(getDepartments).then((result)=> {
-        console.log(result)
         $('#edit-user-dept').html("")
         $('#create-user-dept').html("")
         for(let i = 0; i < result.data.length; i++){
@@ -380,9 +332,6 @@ function getAllDepartments () {
         }
     });
 }
-//Fetch user details for edit
-
-
 
 $('#edit-user-form').on('submit', (event)=> {
     event.preventDefault()
@@ -417,7 +366,6 @@ $('#edit-user-form').on('submit', (event)=> {
     });$.when(sendUserDetails).then(result => {
         $('#edit-user-modal').modal('hide');
         createAlert('user-alert', result.status.description, 'success');
-        resetObject(existingPersonnel);
         sortPersonnelTableByColumn(0, 'ASC');
     }, err => {
         console.log(err)
@@ -428,40 +376,6 @@ $('#edit-user-form').on('submit', (event)=> {
         }
     })
 })
-
-function confirmUpdateDepartment() {
-    $('#confirm-edit-dept-name').html(existingDepartment.name)
-    $('#confirm-edit-dept-location').html(existingDepartment.location)
-}
-
-$('#confirm-edit-dept').on('click', ()=> {
-    updateDept(existingDepartment.name, existingDepartment.ID, existingDepartment.locationID)
-})
-
-
-function updateDept(name, ID, locationID){
-    
-}
-
-
-function confirmCreateLocation (locationName) {
-    $('#confirm-create-location-name').html(locationName)
-}
-
-$('#confirm-add-personnel').on('click', ()=>{
-    //Global variables passed to createNewUser set in Add-Personnel event listener
-    createNewUser(newPersonnel.firstName, newPersonnel.surname, newPersonnel.email, newPersonnel.departmentID)
-})
-
-function addLocation(name){
-}
-
-function confirmEditDepartment(departmentName, locationId, location){
-    $('#confirm-edit-dept-name').html("");
-    $('#confirm-edit-dept-location').html("");
-    $('#confirm-edit-dept-name').html(departmentName);
-    $('#confirm-edit-dept-location').html(location);
-}
 
 $('#edit-dept-form').on('submit', (event)=> {
     //Check for new entries in Edit user modal or leave existing personnel object values:
@@ -486,7 +400,6 @@ $('#edit-dept-form').on('submit', (event)=> {
         if(result.status.code == 200){
             $('#edit-dept-modal').modal('hide')
             createAlert('department-alert', result.status.description, 'success');
-            resetObject(existingDepartment);
             sortDepartmentsTableByColumn(0, 'ASC');
         }
     }, err => {
@@ -500,9 +413,6 @@ $('#edit-dept-form').on('submit', (event)=> {
         }
     })
 })
-
-$('#confirm-add-dept').on('click', ()=> addDepartment(newDepartment.name, newDepartment.locationID));
-$('#confirm-add-location').on('click', ()=> addLocation(newLocationName));
 
 function loadToolTips(){
     let tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
@@ -518,7 +428,6 @@ editUserModal.addEventListener('show.bs.modal', event => {
     {
         id
     });$.when(selectUserById).then(result => {
-        console.log(result);
         if(result.status.code == 200){
         //Full name for Modal Title
         const fullName = `${result.data.personnel[0].firstName} ${result.data.personnel[0].lastName}`
@@ -562,7 +471,6 @@ function populateDepartmentModal (id) {
     {
         id
     });$.when(selectDepartmentByID).then(result => {
-        console.log(result)
         $('#edit-dept-name').val(result.data[0].name)
         $('#dept-id').val(result.data[0].id)
     }, error=> console.log(error))
@@ -586,7 +494,7 @@ $(window).on('resize', ()=> {
 //Table headers stick just below search which moves to fit nav bar on smaller screens so sticky point must be reset
 function setStickyTHeads () {
     if ($(document).width()<= 617){
-        headerHeight = 136
+        headerHeight = 135
         
         tables.forEach(table => {    
             $(`#${table}`).trigger('reflow')
@@ -712,8 +620,6 @@ $('#create-location-form').on('keyup', ()=> {
 
 $('#create-user-form').on('submit', function (event) {
     event.preventDefault();
-    resetObject(newPersonnel)
-        //Update newPersonnelObject
     let firstName = capitalise($('#create-user-firstname').val().trim());
     let lastName = capitalise($('#create-user-surname').val().trim());
     let email = $('#create-user-email').val().trim();
@@ -731,8 +637,6 @@ $('#create-user-form').on('submit', function (event) {
         if(result.status.code == 200){
             $('#create-user-modal').modal('hide');
             $('#create-user-form')[0].reset();
-            console.log(result)
-            resetObject(newPersonnel);
             getAllPersonnel(); 
             createAlert('user-alert', result.status.description, 'success');
             scrollFunction()
@@ -776,7 +680,7 @@ $('#create-location-form').on('submit', event => {
     })
 })
 $('#create-dept-btn').on('click', ()=>{
-    //For some reason sortLocationsByColumn also populates locations dropdown menu in create department modal. Must change!
+    //sortLocationsByColumn also populates locations dropdown menu in create department modal.
     sortLocationsTableByColumn(0, 'ASC');
     $('#create-dept-name').html("");
 });
@@ -1047,32 +951,96 @@ $('.btn-sort').on('click', function () {
     $('.btn-sort').removeClass('active');
     $(this).addClass('active');
 })
-
 $('#locations-tab').on('click', ()=> {
     sortLocationsTableByColumn(0, 'ASC')
 })
 
 $('#personnel-search-addon-btn').on('click', ()=> {
-    const userVal = $('#personnel-search-input').val()
-    searchPersonnelTable(userVal);
+    const searchVal = $('#personnel-search-input').val()
+    var getPersonnelSearchResults = new getData('./Back/personnelSearch.php', 
+    {
+        searchVal
+    });$.when(getPersonnelSearchResults).then((result)=>{
+        $('#search-personnel-table').html("")
+    if(result.data.length == 0){
+        $('#search-personnel-table').html(`
+        <tr>
+            <td></td>
+            <td class="text-center">No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-personnel-table').append(
+            `<tr>
+                <td class="align-middle">${result.data[i].firstName} ${result.data[i].lastName}</td>
+                
+                <td class="d-none d-lg-table-cell"><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
+                <td class="d-none d-lg-table-cell">${result.data[i].department}</td>
+                <td class="d-none d-lg-table-cell">${result.data[i].location}</td>
+
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+    }, (error)=> {
+        console.log(error);
+    })
 })
 
 $('#dept-search-addon-btn').on('click', ()=> {
-    const deptVal = $('#dept-search-input').val()
-    searchDeptTable(deptVal)
+    const searchVal = $('#dept-search-input').val()
+    // searchDeptTable(deptVal)
+    var getPersonnelSearchResults = new getData('./Back/deptSearch.php', 
+    {
+        searchVal
+    });$.when(getPersonnelSearchResults).then((result)=>{
+        $('#search-dept-table').html("")
+    if(result.data.length == 0){
+        $('#search-dept-table').html(`
+        <tr>
+            <td></td>
+            <td class="text-center">No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-dept-table').append(
+            `<tr>
+                <td class="align-middle">${result.data[i].name}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+    })
 })
-
-
 $('#location-search-addon-btn').on('click', ()=> {
-    const locationVal = $('#location-search-input').val()
-    searchLocationTable(locationVal)
-})
-
-const personnelSearchModal = document.getElementById('personnel-search-modal');
-personnelSearchModal.addEventListener('show.bs.modal', event => {
-    const button = event.relatedTarget;
-    // const userId = button.getAttribute('data-id');
-    // populateUserModal(userId)
+    const searchVal = $('#location-search-input').val()
+    var getLocationSearchResults = new getData('./Back/locationSearch.php',
+    {
+        searchVal
+    });$.when(getLocationSearchResults).then((result)=> {
+        $('#search-location-table').html("")
+    if(result.data.length == 0){
+        $('#search-location-table').html(`
+        <tr>
+            <td></td>
+            <td class="text-center">No results found. Please try again.</td>
+            <td></td>
+        </tr>`)
+    }
+    for(let i=0; i< result.data.length; i++){
+        $('#search-location-table').append(
+            `<tr>
+                <td class="align-middle">${result.data[i].name}</td>
+                <td><div class="container-fluid d-flex justify-content-around">
+                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-location-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
+            </tr>`
+        )
+    }
+    })
 })
 
 $('#personnel-search-input').keyup((event)=> {
@@ -1107,99 +1075,6 @@ $("#location-search").keyup((event)=> {
         $('#location-search-addon-btn').click()
     }
 })
-//Send user input to back end
-function searchPersonnelTable (searchVal) {
-    var getPersonnelSearchResults = new getData('./Back/personnelSearch.php', 
-    {
-        searchVal
-    });$.when(getPersonnelSearchResults).then((result)=>{
-        populateSearchPersonnelTable(result)
-    }, (error)=> {
-        console.log(error);
-    })
-}
-function searchDeptTable (searchVal) {
-    var getPersonnelSearchResults = new getData('./Back/deptSearch.php', 
-    {
-        searchVal
-    });$.when(getPersonnelSearchResults).then((result)=>populateSearchDeptTable(result))
-}
-function searchLocationTable (searchVal) {
-    var getLocationSearchResults = new getData('./Back/locationSearch.php',
-    {
-        searchVal
-    });$.when(getLocationSearchResults).then((result)=> populateSearchLocationTable(result))
-}
-//Display results from search to user
-function populateSearchDeptTable (result) {
-    $('#search-dept-table').html("")
-    if(result.data.length == 0){
-        $('#search-dept-table').html(`
-        <tr>
-            <td></td>
-            <td class="text-center">No results found. Please try again.</td>
-            <td></td>
-        </tr>`)
-    }
-    for(let i=0; i< result.data.length; i++){
-        $('#search-dept-table').append(
-            `<tr>
-                <td>${result.data[i].name}</td>
-                <td><div class="container-fluid d-flex justify-content-around">
-                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
-            </tr>`
-        )
-    }
-}
-function populateSearchLocationTable (result) {
-    $('#search-location-table').html("")
-    if(result.data.length == 0){
-        $('#search-location-table').html(`
-        <tr>
-            <td></td>
-            <td class="text-center">No results found. Please try again.</td>
-            <td></td>
-        </tr>`)
-    }
-    for(let i=0; i< result.data.length; i++){
-        $('#search-location-table').append(
-            `<tr>
-                <td>${result.data[i].name}</td>
-                <td><div class="container-fluid d-flex justify-content-around">
-                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-location-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
-            </tr>`
-        )
-    }
-}
-function populateSearchPersonnelTable (result) {
-    $('#search-personnel-table').html("")
-    if(result.data.length == 0){
-        $('#search-personnel-table').html(`
-        <tr>
-            <td></td>
-            <td class="text-center">No results found. Please try again.</td>
-            <td></td>
-        </tr>`)
-    }
-    for(let i=0; i< result.data.length; i++){
-        $('#search-personnel-table').append(
-            `<tr>
-                <td>${result.data[i].firstName}</td>
-                <td>${result.data[i].lastName}</td>
-                <td><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
-                <td class="d-none d-lg-table-cell">${result.data[i].department}</td>
-                <td class="d-none d-lg-table-cell">${result.data[i].location}</td>
-
-                <td><div class="container-fluid d-flex justify-content-around">
-                <button type="button" class="btn btn-light edit-user-btn" data-bs-toggle="modal" data-bs-target="#edit-user-modal" data-table-row="${i+1}" data-id="${result.data[i].id}"><i class="fa-solid fa-pen"></i></button></td>
-            </tr>`
-        )
-    }
-}
-
-function resetObject(objectName) {
-    let keys = Object.keys(objectName).forEach(key => objectName[key]=null);
-}
 
 function capitalise(word) {
     if(!word){
@@ -1211,6 +1086,6 @@ function capitalise(word) {
     }
     const capitalisedWords = words.join(" ");
     return capitalisedWords;
-  }
+}
 
 $( document ).ready(sortPersonnelTableByColumn(0, 'ASC'), getAllDepartments())

@@ -34,7 +34,7 @@
 
 	
 
-    $searchVal = "%".$_POST['searchVal']."%";
+    $searchVal = '%' . $_POST['searchVal']. '%';
 
 	$query = $conn->prepare("SELECT id, name FROM location
     WHERE name LIKE ?");
@@ -42,8 +42,6 @@
 	$query->execute();
 
 	$result = $query->get_result();
-
-	$result = $conn->query($query);
 	
 	if (!$result) {
 
