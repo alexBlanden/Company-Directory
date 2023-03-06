@@ -10,6 +10,11 @@ var getData = function (address, query) {
 }
 
 var headerHeight;
+const editPersonnelFormInputs = $('#edit-user-form')[0];
+console.log($('#edit-user-form'))
+const personnelFormInputs = $('#create-user-form')
+const departmentFormInputs = $('#create-dept-form')
+const locationFormInputs = $('#create-location-form')
 
 window.onscroll = function () {
     scrollFunction();
@@ -42,11 +47,12 @@ setStickyTHeads()
 
 function populatePersonnelTable(result){
     $('#personnel-table-body').html("")
-    // $('#personnel-table-body-hidden').html("")
+    console.log(result.data[0].jobTitle)
         for(let i = 0; i < result.data.length; i++){
             $('#personnel-table-body').append(`<tr>
             <td data-id="${result.data[i].id}">${result.data[i].lastName}</td>
             <td>${result.data[i].firstName}</td>
+            <td class="d-none d-lg-table-cell">${result.data[i].jobTitle}</td>
             <td class="d-none d-lg-table-cell"><a href="mailto:${result.data[i].email}"</a>${result.data[i].email}</td>
             <td class="d-none d-lg-table-cell">${result.data[i].department}</td>
             <td class="d-none d-lg-table-cell">${result.data[i].location}</td>
@@ -339,20 +345,16 @@ $('#edit-user-form').on('submit', (event)=> {
     firstName,
     lastName,
     email,
+    jobTitle,
     departmentName,
     departmentID;
     //Check for new entries in Edit user modal or leave existing personnel object values:
-    personnelID = $('#employeeID').val()
-    if($('#edit-user-forename').val()){
-        firstName = capitalise($('#edit-user-forename').val()).trim()
-    }
-
-    if($('#edit-user-surname').val()){
-        lastName = capitalise($('#edit-user-surname').val()).trim()
-    }
-
-    if($('#edit-user-email').val()){
-        email = $('#edit-user-email').val().trim()
+    personnelID = $('#employeeID').val();
+    firstName = capitalise($('#edit-user-forename').val()).trim();
+    lastName = capitalise($('#edit-user-surname').val()).trim();
+    email = $('#edit-user-email').val().trim();
+    if(('#edit-user-job-title').val()){
+        jobTitle = capitalise($('#edit-user-job-title').val()).trim();
     }
     departmentName = $('#edit-user-dept option:selected').text()
     departmentID = $('#edit-user-dept').val()
@@ -361,6 +363,7 @@ $('#edit-user-form').on('submit', (event)=> {
         firstName,
         lastName,
         email,
+        jobTitle,
         departmentID,
         personnelID
     });$.when(sendUserDetails).then(result => {
@@ -421,6 +424,9 @@ function loadToolTips(){
 
 //Fetch user-id from button data attribute to populate user info modal
 const editUserModal = document.getElementById('edit-user-modal');
+editUserModal.addEventListener('show.bs.modal', () => {
+    
+})
 editUserModal.addEventListener('show.bs.modal', event => {
     const button = event.relatedTarget;
     const id = button.getAttribute('data-id');
@@ -436,6 +442,7 @@ editUserModal.addEventListener('show.bs.modal', event => {
         $('#edit-user-forename').val(result.data.personnel[0].firstName);
         $('#edit-user-surname').val(result.data.personnel[0].lastName);
         $('#edit-user-email').val(result.data.personnel[0].email);
+        $('#edit-user-job-title').val(result.data.personnel[0].jobTitle);
         $('#edit-user-dept').html("");
         for(let i = 0; i < result.data.department.length; i++){
             $('#edit-user-dept').append(`<option value="${result.data.department[i].id}">${result.data.department[i].name}</option>
@@ -448,6 +455,7 @@ editUserModal.addEventListener('show.bs.modal', event => {
         $('#edit-user-modal').html('Error Retrieving Data');
     })
 })
+
 
 const editDepartmentModal = document.getElementById('edit-dept-modal');
 editDepartmentModal.addEventListener('show.bs.modal', event => {
@@ -515,9 +523,6 @@ $(".sticky-header").floatThead({
         return $table.closest(".table-responsive");
     }});
 
-let personnelFormInputs = $('#create-user-form')
-let departmentFormInputs = $('#create-dept-form')
-let locationFormInputs = $('#create-location-form')
 
 $('#cancel-create-user').on('click', (event)=> {
     //Check at least one form input has a value before asking user to confirm cancel:
@@ -566,8 +571,26 @@ $('#cancel-create-location').on('click', (event)=> {
 })
 
 //Check each create user/dept/location form input has a value, 'create' button stays inactive until formValid == true:
+$('#edit-user-form').on('keyup', ()=> {
+    const formValid = $('#edit-user-form')[0].checkValidity();
+    if(formValid){
+        console.log(true)
+        $('#save-changes > button').attr({
+            'disabled': false,
+            'title': ""
+        })
+    } else {
+        $('#save-changes > button').attr({
+            'disabled': true,
+            'data-bs-toggle': "tooltip",
+            'title': "Please complete all fields to continue"
+        })
+    }
+})
+
 $('#create-user-form').on('keyup', ()=> {
     let formInputArray = personnelFormInputs.serializeArray()
+    console.log(formInputArray, personnelFormInputs)
     const formValid = formInputArray.every(input => input.value.trim() !== "")
     if(formValid){
         $('#add-personnel > button').attr({
@@ -623,6 +646,7 @@ $('#create-user-form').on('submit', function (event) {
     let firstName = capitalise($('#create-user-firstname').val().trim());
     let lastName = capitalise($('#create-user-surname').val().trim());
     let email = $('#create-user-email').val().trim();
+    let jobTitle = $('#create-user-job-title').val().trim();
     let department = $("#create-user-dept option:selected").text();
     let departmentID = $('#create-user-dept').val();
         //Display newPersonnelObject to user in modal and ask to confirm action
@@ -631,6 +655,7 @@ $('#create-user-form').on('submit', function (event) {
         firstName,
         lastName,
         email,
+        jobTitle,
         departmentID,
     });$.when(insertUser).then(
         (result)=>{
@@ -789,15 +814,15 @@ function backToTop () {
 
 //Event listeners for buttons in table headers, sort table values by ascending or descending depending on data attribute of button
 $('#p-surname').on('click', ()=> {
-    if($('#p-surname').attr('data') == 'up'){
+    if($('#p-surname').attr('data-direction') == 'up'){
         sortPersonnelTableByColumn(0, 'ASC')
-        $('#p-surname').attr('data', 'down');
+        $('#p-surname').attr('data-direction', 'down');
 
         $('#p-surname > i').attr('class', '')
         $('#p-surname > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#p-surname').attr('data') == 'down'){
+    } else if ($('#p-surname').attr('data-direction') == 'down'){
         sortPersonnelTableByColumn(0, 'DESC')
-        $('#p-surname').attr('data', 'up');
+        $('#p-surname').attr('data-direction', 'up');
 
         $('#p-surname > i').attr('class', '')
         $('#p-surname > i').attr("class", "fa-solid fa-sort-desc")
@@ -805,29 +830,29 @@ $('#p-surname').on('click', ()=> {
 });
 
 $('#p-forename').on('click', ()=> {
-    if($('#p-forename').attr('data') == 'up'){
+    if($('#p-forename').attr('data-direction') == 'up'){
         sortPersonnelTableByColumn(1, 'ASC')
-        $('#p-forename').attr('data', 'down');
+        $('#p-forename').attr('data-direction', 'down');
         $('#p-forename > i').attr('class', '')
         $('#p-forename > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#p-forename').attr('data') == 'down'){
+    } else if ($('#p-forename').attr('data-direction') == 'down'){
         sortPersonnelTableByColumn(1, 'DESC')
-        $('#p-forename').attr('data', 'up');
+        $('#p-forename').attr('data-direction', 'up');
         $('#p-forename > i').attr('class', '')
         $('#p-forename > i').attr("class", "fa-solid fa-sort-desc")
     }
 });
 
 $('#p-email').on('click', ()=> {
-    if($('#p-email').attr('data') == 'up'){
+    if($('#p-email').attr('data-direction') == 'up'){
         sortPersonnelTableByColumn(2, 'ASC')
 
         $('#p-email > i').attr('class', '')
         $('#p-email > i').attr("class", "fa-solid fa-sort-asc")
-        $('#p-email').attr('data', 'down');
+        $('#p-email').attr('data-direction', 'down');
     } else if ($('#p-email').attr('data') == 'down'){
         sortPersonnelTableByColumn(2, 'DESC')
-        $('#p-email').attr('data', 'up');
+        $('#p-email').attr('data-direction', 'up');
 
         $('#p-email > i').attr('class', '')
         $('#p-email > i').attr("class", "fa-solid fa-sort-desc")
@@ -835,31 +860,47 @@ $('#p-email').on('click', ()=> {
 });
 
 $('#p-dept').on('click', ()=> {
-    if($('#p-dept').attr('data') == 'up'){
-        sortPersonnelTableByColumn(3, 'ASC')
-        $('#p-dept').attr('data', 'down');
+    if($('#p-dept').attr('data-direction') == 'up'){
+        sortPersonnelTableByColumn(4, 'ASC')
+        $('#p-dept').attr('data-direction', 'down');
 
         $('#p-dept > i').attr('class', '')
         $('#p-dept > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#p-dept').attr('data') == 'down'){
-        sortPersonnelTableByColumn(3, 'DESC')
-        $('#p-dept').attr('data', 'up');
+    } else if ($('#p-dept').attr('data-direction') == 'down'){
+        sortPersonnelTableByColumn(4, 'DESC')
+        $('#p-dept').attr('data-direction', 'up');
 
         $('#p-dept > i').attr('class', '')
         $('#p-dept > i').attr("class", "fa-solid fa-sort-desc")
     }
 });
 
+$('#p-job-title').on('click', ()=> {
+    if($('#p-job-title').attr('data-direction') == 'up'){
+        sortPersonnelTableByColumn(3, 'ASC')
+        $('#p-job-title').attr('data-direction', 'down');
+
+        $('#p-job-title > i').attr('class', '')
+        $('#p-job-title > i').attr("class", "fa-solid fa-sort-asc")
+    } else if ($('#p-job-title').attr('data-direction') == 'down'){
+        sortPersonnelTableByColumn(3, 'DESC')
+        $('#p-job-title').attr('data-direction', 'up');
+
+        $('#p-job-title > i').attr('class', '')
+        $('#p-job-title > i').attr("class", "fa-solid fa-sort-desc")
+    }
+});
+
 $('#p-location').on('click', ()=> {
-    if($('#p-location').attr('data') == 'up'){
+    if($('#p-location').attr('data-direction') == 'up'){
         sortPersonnelTableByColumn(4, 'ASC')
-        $('#p-location').attr('data', 'down');
+        $('#p-location').attr('data-direction', 'down');
 
         $('#p-location > i').attr('class', '')
         $('#p-location > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#p-location').attr('data') == 'down'){
+    } else if ($('#p-location').attr('data-direction') == 'down'){
         sortPersonnelTableByColumn(4, 'DESC')
-        $('#p-location').attr('data', 'up');
+        $('#p-location').attr('data-direction', 'up');
 
         $('#p-location > i').attr('class', '')
         $('#p-location > i').attr("class", "fa-solid fa-sort-desc")
@@ -867,15 +908,15 @@ $('#p-location').on('click', ()=> {
 });
 
 $('#d-name').on('click', ()=> {
-    if($('#d-name').attr('data') == 'up'){
+    if($('#d-name').attr('data-direction') == 'up'){
         sortDepartmentsTableByColumn(0, 'ASC')
-        $('#d-name').attr('data', 'down');
+        $('#d-name').attr('data-direction', 'down');
 
         $('#d-name > i').attr('class', '')
         $('#d-name > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#d-name').attr('data') == 'down'){
+    } else if ($('#d-name').attr('data-direction') == 'down'){
         sortDepartmentsTableByColumn(0, 'DESC')
-        $('#d-name').attr('data', 'up');
+        $('#d-name').attr('data-direction', 'up');
 
         $('#d-name > i').attr('class', '')
         $('#d-name > i').attr("class", "fa-solid fa-sort-desc")
@@ -883,15 +924,15 @@ $('#d-name').on('click', ()=> {
 });
 
 $('#d-location-name').on('click', ()=> {
-    if($('#d-location-name').attr('data') == 'up'){
+    if($('#d-location-name').attr('data-direction') == 'up'){
         sortDepartmentsTableByColumn(1, 'ASC')
-        $('#d-location-name').attr('data', 'down');
+        $('#d-location-name').attr('data-direction', 'down');
 
         $('#d-location-name > i').attr('class', '')
         $('#d-location-name > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#d-location-name').attr('data') == 'down'){
+    } else if ($('#d-location-name').attr('data-direction') == 'down'){
         sortDepartmentsTableByColumn(1, 'DESC')
-        $('#d-location-name').attr('data', 'up');
+        $('#d-location-name').attr('data-direction', 'up');
 
         $('#d-location-name > i').attr('class', '')
         $('#d-location-name > i').attr("class", "fa-solid fa-sort-desc")
@@ -899,15 +940,15 @@ $('#d-location-name').on('click', ()=> {
 });
 
 $('#d-personnel-count').on('click', ()=> {
-    if($('#d-personnel-count').attr('data') == 'up'){
+    if($('#d-personnel-count').attr('data-direction') == 'up'){
         sortDepartmentsTableByColumn(2, 'ASC')
-        $('#d-personnel-count').attr('data', 'down');
+        $('#d-personnel-count').attr('data-direction', 'down');
 
         $('#d-personnel-count > i').attr('class', '')
         $('#d-personnel-count > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#d-personnel-count').attr('data') == 'down'){
+    } else if ($('#d-personnel-count').attr('data-direction') == 'down'){
         sortDepartmentsTableByColumn(2, 'DESC')
-        $('#d-personnel-count').attr('data', 'up');
+        $('#d-personnel-count').attr('data-direction', 'up');
 
         $('#d-personnel-count > i').attr('class', '')
         $('#d-personnel-count > i').attr("class", "fa-solid fa-sort-desc")
@@ -915,15 +956,15 @@ $('#d-personnel-count').on('click', ()=> {
 });
 
 $('#l-name').on('click', ()=> {
-    if($('#l-name').attr('data') == 'up'){
+    if($('#l-name').attr('data-direction') == 'up'){
         sortLocationsTableByColumn(0, 'ASC')
-        $('#l-name').attr('data', 'down');
+        $('#l-name').attr('data-direction', 'down');
 
         $('#l-name > i').attr('class', '')
         $('#l-name > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#l-name').attr('data') == 'down'){
+    } else if ($('#l-name').attr('data-direction') == 'down'){
         sortLocationsTableByColumn(0, 'DESC')
-        $('#l-name').attr('data', 'up');
+        $('#l-name').attr('data-direction', 'up');
 
         $('#l-name > i').attr('class', '')
         $('#l-name > i').attr("class", "fa-solid fa-sort-desc")
@@ -931,15 +972,15 @@ $('#l-name').on('click', ()=> {
 });
 
 $('#l-dept-count').on('click', ()=> {
-    if($('#l-dept-count').attr('data') == 'up'){
+    if($('#l-dept-count').attr('data-direction') == 'up'){
         sortLocationsTableByColumn(1, 'ASC')
-        $('#l-dept-count').attr('data', 'down');
+        $('#l-dept-count').attr('data-direction', 'down');
 
         $('#l-dept-count > i').attr('class', '')
         $('#l-dept-count > i').attr("class", "fa-solid fa-sort-asc")
-    } else if ($('#l-dept-count').attr('data') == 'down'){
+    } else if ($('#l-dept-count').attr('data-direction') == 'down'){
         sortLocationsTableByColumn(1, 'DESC')
-        $('#l-dept-count').attr('data', 'up');
+        $('#l-dept-count').attr('data-direction', 'up');
 
         $('#l-dept-count > i').attr('class', '')
         $('#l-dept-count > i').attr("class", "fa-solid fa-sort-desc")

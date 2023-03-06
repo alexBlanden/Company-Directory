@@ -28,7 +28,7 @@
 	}	
 	$colVal = $_POST['colVal'];
     $direction = $_POST['direction'];
-    $sortField = ['p.lastName','p.firstName', 'p.email', 'd.name', 'l.name'];
+    $sortField = ['p.lastName','p.firstName', 'p.email','p.jobTitle', 'd.name', 'l.name'];
 
 	$query = 'SELECT p.lastName, p.firstName, p.jobTitle, p.email, p.id, d.name as department, l.name as location FROM personnel p LEFT JOIN department d ON (d.id = p.departmentID) LEFT JOIN location l ON (l.id = d.locationID) ORDER BY ' . $sortField[$colVal] . ' '.$direction;
 

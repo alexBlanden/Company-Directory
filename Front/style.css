@@ -2,6 +2,9 @@ html {
   padding: 0;
   margin: 0;
 }
+.nav-link {
+  cursor: pointer;
+}
 
 #btn-back-to-top {
     position: fixed;
@@ -29,4 +32,12 @@ html {
 }
 #department-alert, #location-alert {
   z-index: 1002;
+}
+
+.modal {
+  overflow: auto;
+}
+.modal-body {
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
 }

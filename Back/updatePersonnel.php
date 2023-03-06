@@ -32,9 +32,9 @@
 
 	}	
 
-	$query = $conn->prepare('UPDATE `personnel` SET `firstName` = ?, `lastName` = ?, `email` = ?,  `departmentID` = ? WHERE `id` = ?');
+	$query = $conn->prepare('UPDATE `personnel` SET `firstName` = ?, `lastName` = ?, `email` = ?, `jobTitle` = ?, `departmentID` = ? WHERE `id` = ?');
 
-	$query->bind_param("sssii", $_POST['firstName'], $_POST['lastName'], $_POST['email'], $_POST['departmentID'], $_POST['personnelID']);
+	$query->bind_param("ssssii", $_POST['firstName'], $_POST['lastName'], $_POST['email'], $_POST['jobTitle'], $_POST['departmentID'], $_POST['personnelID']);
 
 	$query->execute();
 	
