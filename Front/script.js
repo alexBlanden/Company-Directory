@@ -101,7 +101,7 @@ function populateLocationsDropdown (result) {
 function populateLocationsTable(result){
     $('#locations-table-body').html("")
     for (let i=0; i< result.data.length; i++){
-        if(result.data[i].department_count == 0){
+        // if(result.data[i].department_count == 0){
             $('#locations-table-body').append(`
         <tr>
             <td>${result.data[i].location_name}</td>
@@ -111,19 +111,19 @@ function populateLocationsTable(result){
                                 <button type="button" class="btn btn-danger delete-location-btn" data-id="${result.data[i].location_id}"><i class="fa-solid fa-trash"></i></button>
                 </div></td>
         </tr>`)
-        } else {
-            $('#locations-table-body').append(`
-            <tr>
-                <td>${result.data[i].location_name}</td>
-                <td class="text-end">${result.data[i].department_count}</td>
-                <td><div class="container-fluid d-flex justify-content-around">
-                                <button type="button" class="btn btn-light" data-id="${result.data[i].location_id}" data-bs-toggle="modal" data-bs-target="#edit-location-modal"><i class="fa-solid fa-pen"></i></button>
-                                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Location must be emtpy. Please move Departments!">
-                                <button type="button" class="btn btn-danger disabled"><i class="fa-solid fa-trash"></i></button>
-                                </span>
-                </div></td>
-            </tr>`)
-        }
+        // } else {
+        //     $('#locations-table-body').append(`
+        //     <tr>
+        //         <td>${result.data[i].location_name}</td>
+        //         <td class="text-end">${result.data[i].department_count}</td>
+        //         <td><div class="container-fluid d-flex justify-content-around">
+        //                         <button type="button" class="btn btn-light" data-id="${result.data[i].location_id}" data-bs-toggle="modal" data-bs-target="#edit-location-modal"><i class="fa-solid fa-pen"></i></button>
+        //                         <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Location must be emtpy. Please move Departments!">
+        //                         <button type="button" class="btn btn-danger disabled"><i class="fa-solid fa-trash"></i></button>
+        //                         </span>
+        //         </div></td>
+        //     </tr>`)
+        // }
     }
     loadToolTips();
     $(window).trigger('resize');
@@ -133,8 +133,7 @@ function populateLocationsTable(result){
 function populateDepartmentsTable (result) {
     $('#departments-table-body').html("");
     for(let i=0; i<result.data.departmentAndLocation.length; i++){
-        if(result.data.departmentAndLocation[i].personnel_count == '0'){
-            $('#departments-table-body').append(`
+        $('#departments-table-body').append(`
         <tr>
             <td>${result.data.departmentAndLocation[i].deptName}</td>
             <td>${result.data.departmentAndLocation[i].locName}</td>
@@ -145,21 +144,6 @@ function populateDepartmentsTable (result) {
             </div></td>
         </tr>
         `)
-        } else {
-            $('#departments-table-body').append(`
-        <tr>
-            <td>${result.data.departmentAndLocation[i].deptName}</td>
-            <td>${result.data.departmentAndLocation[i].locName}</td>
-            <td class="text-end d-none d-lg-table-cell">${result.data.departmentAndLocation[i].personnel_count}</td>
-            <td><div class="container-fluid d-flex justify-content-around">
-                            <button type="button" class="btn btn-light edit-dept-button" data-bs-toggle="modal" data-bs-target="#edit-dept-modal" data-id="${result.data.departmentAndLocation[i].deptID}" data-loc-id="${result.data.departmentAndLocation[i].locID}"><i class="fa-solid fa-pen"></i></button>
-                            <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Department must be emtpy. Please move Personnel!">
-                            <button type="button" class="btn btn-danger disabled"><i class="fa-solid fa-trash"></i></button>
-                            </span>
-            </div></td>
-        </tr>
-        `)
-        }
     }
     loadToolTips()
     $(window).trigger('resize');
@@ -1274,6 +1258,5 @@ function capitalise(word) {
 
 $( document ).ready(function() {
     sortPersonnelTableByColumn(0, 'ASC')
-    // getAllDepartments()
 }
  )

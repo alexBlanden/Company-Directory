@@ -524,14 +524,17 @@
     <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">   
         <div class="modal-content shadow">          
           <div class="modal-header">
-            <h5 class="modal-title">Error</h5>
+            <div class="container d-flex justify-content-start">
+                <i class="fa-solid fa-2x fa-ban text-danger me-2"></i>
+                <h4 class="modal-title">Error</h4>
+            </div>
             <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
           <div class="modal-body">
             You cannot remove the entry for <span id="cant-delete-dept-name" class="fw-bold"></span> because it has <span id="dept-count" class="fw-bold"></span> employees assigned to it.
           </div>
           <div class="modal-footer">
-            <button type="button" class="btn btn-outline-secondary" id="cant-delete-dept-close" data-bs-dismiss="modal">OK</button>
+            <button type="button" class="btn btn-secondary" id="cant-delete-dept-close" data-bs-dismiss="modal">OK</button>
           </div>  
         </div> 
       </div>
@@ -541,14 +544,17 @@
         <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">  
             <div class="modal-content shadow">          
               <div class="modal-header">
-                <h5 class="modal-title">Error</h5>
+                <div class="container d-flex justify-content-start">
+                    <i class="fa-solid fa-2x fa-ban text-danger me-2"></i>
+                    <h4 class="modal-title">Error</h4>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">
                 You cannot remove the entry for <span id="cant-delete-location-name" class="fw-bold"></span> because it has <span id="location-count" class="fw-bold"></span> Departments assigned to it.
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" id="cant-delete-location-close" data-bs-dismiss="modal">OK</button>
+                <button type="button" class="btn btn-secondary" id="cant-delete-location-close" data-bs-dismiss="modal">OK</button>
               </div>  
             </div> 
           </div>
